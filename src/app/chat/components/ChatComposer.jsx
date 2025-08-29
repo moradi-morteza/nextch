@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import styles from "./ChatComposer.module.scss";
 
 export default function ChatComposer({ onSend, onVoice }) {
   const [text, setText] = useState("");
@@ -112,7 +113,7 @@ export default function ChatComposer({ onSend, onVoice }) {
   };
 
   return (
-    <div className="w-full tg-bottombar shrink-0">
+    <div className={`tg-bottombar shrink-0 ${styles.root}`}>
       <div className="mx-auto max-w-3xl px-2">
         {recording ? (
           <div className="h-14 flex items-center gap-3">
@@ -133,7 +134,7 @@ export default function ChatComposer({ onSend, onVoice }) {
             </div>
           </div>
         ) : (
-          <div className="h-14 flex items-center gap-1">
+          <div className={styles.row}>
             <button type="button" aria-label="Emoji" className="p-2 text-gray-500 hover:text-gray-700">
               <span className="material-symbols-rounded text-[26px]">mood</span>
             </button>
@@ -178,4 +179,3 @@ export default function ChatComposer({ onSend, onVoice }) {
     </div>
   );
 }
-

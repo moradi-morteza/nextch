@@ -1,0 +1,9 @@
+.root {
+  width: 100%;
+}
+.row {
+  height: 3.5rem; /* h-14 */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* gap-1 */
+}
