@@ -10,7 +10,7 @@ import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 
-export default function ChatComposer({ onSend, onVoice, onSendImage, onSendImages, maxUploadMB = 5, showCommands = false }) {
+export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImage, onSendImages, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [cancelSlide, setCancelSlide] = useState(false);
@@ -42,7 +42,7 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, onSendImage
   const handleSend = () => {
     const value = text.trim();
     if (!value) return;
-    onSend?.(value);
+    onSendMessage?.(value);
     setText("");
     playSendSound();
   };
@@ -72,7 +72,7 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, onSendImage
         const blob = new Blob(chunksRef.current, { type: mime || "audio/webm" });
         if (!cancelSlide) {
           const url = URL.createObjectURL(blob);
-          onVoice?.({ url, blob, duration: recordSecs });
+          onVoiceMessage?.({ url, blob, duration: recordSecs });
         }
         setCancelSlide(false);
         stream.getTracks().forEach((t) => t.stop());
@@ -164,7 +164,7 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, onSendImage
 
   return (
     <div className={`tg-bottombar shrink-0 ${styles.root}`}>
-      <div className="mx-auto max-w-3xl px-3">
+      <div className="mx-auto max-w-3xl px-2">
         {recording ? (
           <div className="h-14 flex items-center gap-3">
             <div className={`text-[13px] ${cancelSlide ? "text-red-600" : "text-gray-600"}`}>
@@ -242,7 +242,7 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, onSendImage
               ref={textAreaRef}
               dir="rtl"
               rows={1}
-              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2 resize-none leading-6"
+              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2 resize-none leading-6 self-center"
               placeholder="اینجا بنویسید ..."
               value={text}
               onChange={(e) => { setText(e.target.value); }}

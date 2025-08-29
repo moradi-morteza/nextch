@@ -2,10 +2,12 @@
   width: 100%;
 }
 .row {
-  height: 3.5rem; /* h-14 */
+  /* Let composer grow with textarea; keep a comfortable minimum */
+  min-height: 3.5rem; /* ~h-14 */
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* keep icons pinned to bottom when textarea grows */
   gap: 0.235rem; /* tighter gap between item like bottombar chat icon space */
+  padding-block: 10px; /* extra 10px top/bottom padding */
 }
 
 .iconTight {
