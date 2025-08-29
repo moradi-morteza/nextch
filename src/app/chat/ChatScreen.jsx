@@ -73,18 +73,27 @@ export default function ChatScreen() {
         <ChatComposer
           onSend={handleSend}
           onVoice={handleVoice}
-          onSendImage={({ url, caption, width, height }) =>
+          onSendImages={({ items, caption }) =>
             setMessages((m) => [
               ...m,
-              {
-                id: Date.now(),
-                type: "image",
-                content: url,
-                caption: caption || "",
-                meta: { width, height },
-                from: "me",
-                ts: Date.now(),
-              },
+              items.length <= 1
+                ? {
+                    id: Date.now(),
+                    type: "image",
+                    content: items[0].url,
+                    caption: caption || "",
+                    meta: { width: items[0].width, height: items[0].height },
+                    from: "me",
+                    ts: Date.now(),
+                  }
+                : {
+                    id: Date.now(),
+                    type: "image_group",
+                    images: items,
+                    caption: caption || "",
+                    from: "me",
+                    ts: Date.now(),
+                  },
             ])
           }
           maxUploadMB={MAX_UPLOAD_MB}

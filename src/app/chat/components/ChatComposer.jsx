@@ -10,12 +10,13 @@ import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 
-export default function ChatComposer({ onSend, onVoice, onSendImage, maxUploadMB = 5, showCommands = false }) {
+export default function ChatComposer({ onSend, onVoice, onSendImage, onSendImages, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [cancelSlide, setCancelSlide] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
-  const [imagePreview, setImagePreview] = useState(null); // { url, file, width, height }
+  const [imagePreview, setImagePreview] = useState(null); // single
+  const [images, setImages] = useState([]); // multiple [{url,file,width,height}]
   const [caption, setCaption] = useState("");
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -112,22 +113,16 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, maxUploadMB
   useEffect(() => { autoResize(); }, [text]);
 
   const onPickFiles = async (evt) => {
-    const file = evt.target.files?.[0];
-    evt.target.value = ""; // allow picking same file again later
-    if (!file) return;
+    const files = Array.from(evt.target.files || []);
+    evt.target.value = "";
+    if (!files.length) return;
     const limit = maxUploadMB * 1024 * 1024;
-    if (!file.type.startsWith("image/")) {
-      alert("Only images are supported right now.");
-      return;
-    }
-    if (file.size > limit) {
-      alert(`File exceeds ${maxUploadMB}MB limit.`);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => setImagePreview({ url, file, width: img.width, height: img.height });
-    img.src = url;
+    const valids = files.filter((f) => f.type.startsWith("image/") && f.size <= limit);
+    if (!valids.length) { alert(`Only images up to ${maxUploadMB}MB are allowed.`); return; }
+    // Load sizes
+    const metas = await Promise.all(valids.map((f) => new Promise((res)=>{ const url = URL.createObjectURL(f); const i=new Image(); i.onload=()=>res({url,file:f,width:i.width,height:i.height}); i.src=url; })));
+    if (metas.length === 1) { setImagePreview(metas[0]); setImages([]); }
+    else { setImages(metas); setImagePreview(null); }
   };
 
   const cancelImage = () => {
@@ -142,6 +137,9 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, maxUploadMB
     setImagePreview(null);
     setCaption("");
   };
+
+  const cancelImages = () => { images.forEach(i=> i.url && URL.revokeObjectURL(i.url)); setImages([]); setCaption(""); };
+  const sendImages = () => { if (!images.length) return; onSendImages?.({ items: images, caption }); setImages([]); setCaption(""); };
 
   const onMicPointerDown = (e) => {
     pointerStartX.current = e.clientX ?? (e.touches?.[0]?.clientX || 0);
@@ -185,14 +183,44 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, maxUploadMB
               </IconButton>
             </div>
           </div>
-        ) : imagePreview ? (
+        ) : images.length > 0 ? (
           <div className="w-full flex items-start gap-2 py-2">
-            <img src={imagePreview.url} alt="preview" className="w-24 h-24 object-cover rounded-lg border" />
+            <div className="relative">
+              <img
+                src={images[0].url}
+                alt="preview-0"
+                className="w-24 h-24 object-cover rounded-lg"
+              />
+              {images.length > 1 && (
+                <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded-full text-xs text-white"
+                     style={{ background: 'rgba(0,0,0,0.6)' }}>
+                  +{images.length - 1}
+                </div>
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <textarea
                 dir="rtl"
                 rows={2}
-                className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none border rounded-lg"
+                className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none rounded-lg"
+                placeholder="کپشن اختیاری"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+              />
+              <div className="mt-2 flex gap-2 justify-end">
+                <IconButton onClick={cancelImages} size="small">لغو</IconButton>
+                <IconButton onClick={sendImages} color="primary" size="small">ارسال</IconButton>
+              </div>
+            </div>
+          </div>
+        ) : imagePreview ? (
+          <div className="w-full flex items-start gap-2 py-2">
+            <img src={imagePreview.url} alt="preview" className="w-24 h-24 object-cover rounded-lg" />
+            <div className="flex-1 min-w-0">
+              <textarea
+                dir="rtl"
+                rows={2}
+                className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none rounded-lg"
                 placeholder="کپشن اختیاری"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
@@ -223,7 +251,7 @@ export default function ChatComposer({ onSend, onVoice, onSendImage, maxUploadMB
             {text.trim().length === 0 && (
               <>
                 <label className="cursor-pointer">
-                  <input type="file" accept="image/*" multiple={false} className="hidden" onChange={onPickFiles} />
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} />
                   <Tooltip title="Attach file">
                     <IconButton aria-label="Attach" size="medium" component="span" sx={{ p: 0.5 }}>
                       <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />

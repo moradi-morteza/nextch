@@ -35,6 +35,25 @@ export default function MessageItem({ message }) {
               <span className="text-right block whitespace-pre-wrap break-words">{message.caption}</span>
             )}
           </div>
+        ) : message.type === "image_group" ? (
+          <div className="flex flex-col items-start gap-1">
+            <div className="grid gap-1" style={{ gridTemplateColumns: (message.images?.length || 0) <= 1 ? '1fr' : '1fr 1fr' }}>
+              {(message.images || []).slice(0,4).map((img, idx)=> (
+                <div key={idx} className={(message.images?.length===3 && idx===0)? 'col-span-2 md:col-span-1 row-span-2':''} style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }}>
+                  <img src={img.url} alt={`img-${idx}`} className="w-full h-full object-cover block" />
+                </div>
+              ))}
+              {message.images && message.images.length>4 && (
+                <div className="relative" style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }}>
+                  <img src={message.images[4].url} alt="more" className="w-full h-full object-cover block opacity-70" />
+                  <div className="absolute inset-0 grid place-items-center text-white text-lg font-semibold" style={{ background:'rgba(0,0,0,0.4)' }}>+{message.images.length-4}</div>
+                </div>
+              )}
+            </div>
+            {message.caption && (
+              <span className="text-right block whitespace-pre-wrap break-words">{message.caption}</span>
+            )}
+          </div>
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}
