@@ -157,15 +157,13 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
           <button onClick={cancel} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
         </div>
       </div>
+      <style jsx>{` // fade in fade out record animation
+        .fade-dot { animation: fadeInOut 1.8s ease-in-out infinite; }
+        @keyframes fadeInOut {
+          0%, 100% { opacity: 0.10; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
-
-/* simple fade in/out animation for the red dot */
-<style jsx>{`
-  .fade-dot { animation: fadeInOut 1.1s ease-in-out infinite; }
-  @keyframes fadeInOut {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 1; }
-  }
-`}</style>
