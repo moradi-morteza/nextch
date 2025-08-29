@@ -1,8 +1,17 @@
 import styles from "./MessageItem.module.scss";
 import { IMAGE_MAX_WIDTH_PX, IMAGE_MAX_HEIGHT_PX } from "../config.js";
+import { useState } from "react";
+import ImageSlider from "./ImageSlider.jsx";
 
 export default function MessageItem({ message }) {
   const isMe = message.from === "me";
+  const [showSlider, setShowSlider] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
+  const openSlider = (images, idx = 0) => {
+    if (!images || images.length === 0) return;
+    setStartIndex(idx);
+    setShowSlider(true);
+  };
   return (
     <li className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
       <div
@@ -27,8 +36,9 @@ export default function MessageItem({ message }) {
               <img
                 src={message.content}
                 alt={message.caption || "image"}
-                className="block w-full h-auto"
+                className="block w-full h-auto cursor-zoom-in"
                 style={{ maxHeight: IMAGE_MAX_HEIGHT_PX + "px", objectFit: "contain" }}
+                onClick={() => openSlider([{ url: message.content, caption: message.caption }], 0)}
               />
             </div>
             {message.caption && (
@@ -42,11 +52,11 @@ export default function MessageItem({ message }) {
             <div className="grid gap-1" style={{ gridTemplateColumns: (message.images?.length || 0) <= 1 ? '1fr' : '1fr 1fr' }}>
               {(message.images || []).slice(0,4).map((img, idx)=> (
                 <div key={idx} className={(message.images?.length===3 && idx===0)? 'col-span-2 md:col-span-1 row-span-2':''} style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }}>
-                  <img src={img.url} alt={`img-${idx}`} className="w-full h-full object-cover block" />
+                  <img src={img.url} alt={`img-${idx}`} className="w-full h-full object-cover block cursor-zoom-in" onClick={() => openSlider(message.images, idx)} />
                 </div>
               ))}
               {message.images && message.images.length>4 && (
-                <div className="relative" style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }}>
+                <div className="relative cursor-zoom-in" style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }} onClick={() => openSlider(message.images, 4)}>
                   <img src={message.images[4].url} alt="more" className="w-full h-full object-cover block opacity-70" />
                   <div className="absolute inset-0 grid place-items-center text-white text-lg font-semibold" style={{ background:'rgba(0,0,0,0.4)' }}>+{message.images.length-4}</div>
                 </div>
@@ -60,6 +70,20 @@ export default function MessageItem({ message }) {
           </div>
         ) : (
           <audio controls className="max-w-full" src={message.content} />
+        )}
+        {showSlider && (
+          <ImageSlider
+            images={(message.type === 'image_group' ? message.images : [{ url: message.content, caption: message.caption }])}
+            startIndex={startIndex}
+            onClose={() => setShowSlider(false)}
+          />
+        )}
+        {showSlider && (
+          <ImageSlider
+            images={(message.type === 'image_group' ? message.images : [{ url: message.content, caption: message.caption }])}
+            startIndex={startIndex}
+            onClose={() => setShowSlider(false)}
+          />
         )}
         <div className="mt-1 text-[11px] text-gray-500 text-right">
           {new Date(message.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
