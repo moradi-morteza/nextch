@@ -13,6 +13,7 @@ export const MessageType = {
   IMAGE: "image",
   IMAGE_GROUP: "image_group",
   AUDIO: "audio",
+  SYSTEM: "system",
 };
 
 export function newId() {
@@ -47,3 +48,6 @@ export function makeAudio({ url, duration, from = "me" }) {
   return { ...base(from), type: MessageType.AUDIO, content: url, meta: { duration } };
 }
 
+export function makeSystem({ text }) {
+  return { ...base("system"), type: MessageType.SYSTEM, content: text };
+}

@@ -7,13 +7,15 @@ import ChatHeader from "./components/ChatHeader.jsx";
 import ChatBackground from "./components/ChatBackground.jsx";
 import MessageItem from "./components/MessageItem.jsx";
 import ChatComposer from "./components/ChatComposer.jsx";
-import { makeText, makeImage, makeImageGroup, makeAudio } from "./messages.js";
+import { makeText, makeImage, makeImageGroup, makeAudio, makeSystem } from "./messages.js";
 import { MAX_UPLOAD_MB } from "./config.js";
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
-    { id: 1, type: "text", content: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them", ts: Date.now() - 600000 },
-    { id: 2, type: "text", content: "درورد بر تو حالت خوبه؟ واقعا ای جان", from: "me", ts: Date.now() - 300000 },
+    makeSystem({ text: "Today" }),
+    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
+    makeText({ text: "درورد بر تو حالت خوبه؟ واقعا ای جان" }),
+    makeSystem({ text: "سلام دوست گرامی شما میتوانید در این گفتگو به خوبی شرکت کنید و بهترین و برترین نمایشن نامه های یی که برای شما نوشته شده است را پیدا کنید." }),
   ]);
   const listRef = useRef(null);
 

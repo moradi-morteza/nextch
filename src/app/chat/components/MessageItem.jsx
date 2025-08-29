@@ -5,6 +5,7 @@ import ImageSlider from "./ImageSlider.jsx";
 
 export default function MessageItem({ message }) {
   const isMe = message.from === "me";
+  const isSystem = message.type === 'system' || message.from === 'system';
   const [showSlider, setShowSlider] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
   const openSlider = (images, idx = 0) => {
@@ -13,14 +14,20 @@ export default function MessageItem({ message }) {
     setShowSlider(true);
   };
   return (
-    <li className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+    <li className={`flex ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"}`}>
       <div
-        className={`${styles.bubble} px-3 py-2 text-[15px] leading-snug rounded-2xl shadow-sm ${
-          isMe ? `${styles.me} bubble-me` : `${styles.them} bubble-them`
-        }`}
-        style={{ direction: 'rtl', unicodeBidi: 'isolate-override' }}
+        className={
+          isSystem
+            ? "px-2 py-2 text-[14px] leading-4 rounded-lg bg-black/45 text-white mx-auto backdrop-blur-sm"
+            : `${styles.bubble} px-3 py-2 text-[15px] leading-snug rounded-2xl shadow-sm ${
+                isMe ? `${styles.me} bubble-me` : `${styles.them} bubble-them`
+              }`
+        }
+        style={isSystem ? undefined : { direction: 'rtl', unicodeBidi: 'isolate-override' }}
       >
-        {message.type === "text" ? (
+        {isSystem ? (
+          <span className="whitespace-pre-wrap text-center block">{message.content}</span>
+        ) : message.type === "text" ? (
           <span className="whitespace-pre-wrap break-words text-right block">
             {message.content}
           </span>
@@ -85,9 +92,11 @@ export default function MessageItem({ message }) {
             onClose={() => setShowSlider(false)}
           />
         )}
-        <div className="mt-1 text-[11px] text-gray-500 text-right">
-          {new Date(message.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </div>
+        {!isSystem && (
+          <div className="mt-1 text-[11px] text-gray-500 text-right">
+            {new Date(message.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        )}
       </div>
     </li>
   );
