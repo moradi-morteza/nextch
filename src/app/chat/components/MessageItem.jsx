@@ -8,9 +8,12 @@ export default function MessageItem({ message }) {
         className={`${styles.bubble} px-3 py-2 text-[15px] leading-snug rounded-2xl shadow-sm ${
           isMe ? `${styles.me} bubble-me` : `${styles.them} bubble-them`
         }`}
+        style={{ direction: 'rtl', unicodeBidi: 'isolate-override' }}
       >
         {message.type === "text" ? (
-          <span>{message.content}</span>
+          <span className="whitespace-pre-wrap break-words text-right block">
+            {message.content}
+          </span>
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}

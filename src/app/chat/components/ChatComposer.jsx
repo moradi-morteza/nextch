@@ -148,8 +148,9 @@ export default function ChatComposer({ onSend, onVoice }) {
               </IconButton>
             </Tooltip>
             <input
-              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] placeholder:text-gray-400 px-2"
-              placeholder="Message"
+              dir="rtl"
+              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2"
+              placeholder="اینجا بنویسید ..."
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={onKeyDown}

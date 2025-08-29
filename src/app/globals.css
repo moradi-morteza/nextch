@@ -38,9 +38,16 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI,
+  font-family: "Yekan Bakh FaNum", var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI,
     Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
+}
+
+/* Optional utility to apply the local font explicitly */
+.font-yekan {
+  font-family: "Yekan Bakh FaNum", var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI,
+    Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji" !important;
 }
 
 /* Material Symbols (Rounded) helper */

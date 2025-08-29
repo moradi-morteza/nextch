@@ -10,8 +10,8 @@ import ChatComposer from "./components/ChatComposer.jsx";
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
-    { id: 1, type: "text", content: "Hi!", from: "them", ts: Date.now() - 600000 },
-    { id: 2, type: "text", content: "This looks like Telegram.", from: "me", ts: Date.now() - 300000 },
+    { id: 1, type: "text", content: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them", ts: Date.now() - 600000 },
+    { id: 2, type: "text", content: "درورد بر تو حالت خوبه؟ واقعا ای جان", from: "me", ts: Date.now() - 300000 },
   ]);
   const listRef = useRef(null);
 
@@ -39,6 +39,20 @@ export default function ChatScreen() {
       primary: { main: "#3390ec" },
     },
     shape: { borderRadius: 12 },
+    typography: {
+      fontFamily:
+        '"Yekan Bakh FaNum", -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"',
+    },
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            fontFamily:
+              '"Yekan Bakh FaNum", -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"',
+          },
+        },
+      },
+    },
   });
 
   return (
