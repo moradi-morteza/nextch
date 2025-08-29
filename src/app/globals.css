@@ -7,9 +7,9 @@
   --primary-foreground: #ffffff;
 
   /* Telegram-like background overlay colors */
-  --tg-grad-1: rgba(255, 235, 59, 0.35);   /* warm yellow */
-  --tg-grad-2: rgba(16, 185, 129, 0.35);   /* emerald/green */
-  --tg-grad-3: rgba(59, 130, 246, 0.22);   /* soft blue accent */
+  --tg-grad-1: rgba(255, 238, 95, 0.55);   /* warm yellow */
+  --tg-grad-2: rgba(18, 213, 148, 0.55);   /* emerald/green */
+  --tg-grad-3: rgba(31, 109, 238, 0.47);   /* soft blue accent */
   --tg-grad-opacity: 0.85;                 /* overlay global opacity */
 
   /* Bars (header/footer) line + shadow configuration */
@@ -18,6 +18,10 @@
   --tg-bottombar-line-alpha: 0.06;        /* very light line on footer */
   --tg-topbar-shadow: 0 6px 12px -8px rgb(0 0 0 / 0.12);
   --tg-bottombar-shadow: 0 -6px 12px -8px rgb(0 0 0 / 0.12);
+
+  /* Chat bubble defaults */
+  --bubble-me-bg: #d1e9ff;    /* outgoing bubble */
+  --bubble-them-bg: #f1f5f9;  /* incoming bubble */
 }
 
 @theme inline {
@@ -83,3 +87,7 @@ body {
   border-top: 1px solid rgb(var(--tg-bar-line-rgb) / var(--tg-bottombar-line-alpha));
   box-shadow: var(--tg-bottombar-shadow);
 }
+
+/* Chat bubbles */
+.bubble-me { background: var(--bubble-me-bg, #d1e9ff); color: #111827; }
+.bubble-them { background: var(--bubble-them-bg, #f1f5f9); color: #111827; }
