@@ -2,6 +2,13 @@
 
 import { useRef, useState } from "react";
 import styles from "./ChatComposer.module.scss";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import MoodRoundedIcon from "@mui/icons-material/MoodRounded";
+import AttachFileRoundedIcon from "@mui/icons-material/AttachFileRounded";
+import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import StopRoundedIcon from "@mui/icons-material/StopRounded";
 
 export default function ChatComposer({ onSend, onVoice }) {
   const [text, setText] = useState("");
@@ -114,32 +121,34 @@ export default function ChatComposer({ onSend, onVoice }) {
 
   return (
     <div className={`tg-bottombar shrink-0 ${styles.root}`}>
-      <div className="mx-auto max-w-3xl px-2">
+      <div className="mx-auto max-w-3xl px-3">
         {recording ? (
           <div className="h-14 flex items-center gap-3">
             <div className={`text-[13px] ${cancelSlide ? "text-red-600" : "text-gray-600"}`}>
               {cancelSlide ? "Release to cancel" : `Recording ${formatTime(recordSecs)} – slide left to cancel`}
             </div>
             <div className="ml-auto">
-              <button
-                type="button"
-                aria-label="Release to stop"
+              <IconButton
                 onPointerMove={onMicPointerMove}
                 onPointerUp={onMicPointerUp}
                 onPointerCancel={() => stopRecording(true)}
-                className={`p-2 ${cancelSlide ? "text-red-600" : "text-blue-600"}`}
+                color={cancelSlide ? "error" : "primary"}
+                aria-label="Release to stop"
+                size="large"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
-              </button>
+                <StopRoundedIcon />
+              </IconButton>
             </div>
           </div>
         ) : (
           <div className={styles.row}>
-            <button type="button" aria-label="Emoji" className="p-2 text-gray-500 hover:text-gray-700">
-              <span className="material-symbols-rounded text-[26px]">mood</span>
-            </button>
+            <Tooltip title="Emoji">
+              <IconButton aria-label="Emoji" size="medium" sx={{ p: 0.5 }}>
+                <MoodRoundedIcon fontSize="medium" />
+              </IconButton>
+            </Tooltip>
             <input
-              className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-gray-400 px-2"
+              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] placeholder:text-gray-400 px-2"
               placeholder="Message"
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -147,31 +156,36 @@ export default function ChatComposer({ onSend, onVoice }) {
             />
             {text.trim().length === 0 && (
               <>
-                <button type="button" aria-label="Commands" className="p-2 text-gray-500 hover:text-gray-700">
-                  <span className="material-symbols-rounded text-[24px]">smart_toy</span>
-                </button>
-                <label className="p-2 text-gray-500 hover:text-gray-700 cursor-pointer">
+                <label className="cursor-pointer">
                   <input type="file" accept="image/*,video/*,audio/*" multiple className="hidden" />
-                  <span className="material-symbols-rounded text-[24px]">attach_file</span>
+                  <Tooltip title="Attach file">
+                    <IconButton aria-label="Attach" size="medium" component="span" sx={{ p: 0.5 }}>
+                      <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
+                    </IconButton>
+                  </Tooltip>
                 </label>
               </>
             )}
             {text.trim().length > 0 ? (
-              <button type="button" aria-label="Send" onClick={handleSend} className="p-2 text-[#3390ec]">
-                <span className="material-symbols-rounded text-[28px]">send</span>
-              </button>
+              <Tooltip title="Send">
+                <IconButton aria-label="Send" color="primary" onClick={handleSend} size="medium" sx={{ p: 0.5 }}>
+                  <SendRoundedIcon />
+                </IconButton>
+              </Tooltip>
             ) : (
-              <button
-                type="button"
-                aria-label="Hold to record"
-                onPointerDown={onMicPointerDown}
-                onPointerMove={onMicPointerMove}
-                onPointerUp={onMicPointerUp}
-                onPointerCancel={() => stopRecording(true)}
-                className="p-2 text-gray-500 hover:text-gray-700"
-              >
-                <span className="material-symbols-rounded text-[26px]">mic</span>
-              </button>
+              <Tooltip title="Hold to record">
+                <IconButton
+                  aria-label="Hold to record"
+                  onPointerDown={onMicPointerDown}
+                  onPointerMove={onMicPointerMove}
+                  onPointerUp={onMicPointerUp}
+                  onPointerCancel={() => stopRecording(true)}
+                  size="medium"
+                  sx={{ p: 0.5 }}
+                >
+                  <MicNoneRoundedIcon sx={{ fontSize: 26 }} titleAccess="Mic" />
+                </IconButton>
+              </Tooltip>
             )}
           </div>
         )}

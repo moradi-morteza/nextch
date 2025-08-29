@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import ChatHeader from "./components/ChatHeader.jsx";
 import ChatBackground from "./components/ChatBackground.jsx";
 import MessageItem from "./components/MessageItem.jsx";
@@ -32,20 +34,29 @@ export default function ChatScreen() {
     ]);
   };
 
+  const theme = createTheme({
+    palette: {
+      primary: { main: "#3390ec" },
+    },
+    shape: { borderRadius: 12 },
+  });
+
   return (
-    <main className="h-[100dvh] w-full flex flex-col bg-white overflow-hidden">
-      <ChatHeader title="Morteza" status="online" avatar="M" />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <main className="h-[100dvh] w-full flex flex-col bg-white overflow-hidden">
+        <ChatHeader title="Morteza" status="online" avatar="M" />
 
-      <ChatBackground scrollRef={listRef} image="/background.jpg">
-        <ul className="space-y-1.5">
-          {messages.map((m) => (
-            <MessageItem key={m.id} message={m} />
-          ))}
-        </ul>
-      </ChatBackground>
+        <ChatBackground scrollRef={listRef} image="/background.jpg">
+          <ul className="space-y-1.5">
+            {messages.map((m) => (
+              <MessageItem key={m.id} message={m} />
+            ))}
+          </ul>
+        </ChatBackground>
 
-      <ChatComposer onSend={handleSend} onVoice={handleVoice} />
-    </main>
+        <ChatComposer onSend={handleSend} onVoice={handleVoice} showCommands={false} />
+      </main>
+    </ThemeProvider>
   );
 }
-
