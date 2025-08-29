@@ -29,7 +29,11 @@ export default function MessageItem({ message }) {
         style={
           isSystem
             ? undefined
-            : { direction: 'rtl', unicodeBidi: 'isolate-override', minWidth: '50%' }
+            : {
+                direction: 'rtl',
+                unicodeBidi: 'isolate-override',
+                ...(message.type === 'audio' ? { minWidth: '50%' } : {}),
+              }
         }
       >
         {isSystem ? (
@@ -39,7 +43,7 @@ export default function MessageItem({ message }) {
             {message.content}
           </span>
         ) : message.type === "image" ? (
-          <div className="flex flex-col items-start gap-1" style={{ maxWidth: IMAGE_MAX_WIDTH_PX + 'px', minWidth: '50%' }}>
+          <div className="flex flex-col items-start gap-1" style={{ maxWidth: IMAGE_MAX_WIDTH_PX + 'px' }}>
             <div
               className="rounded-lg overflow-hidden"
               style={{
@@ -62,7 +66,7 @@ export default function MessageItem({ message }) {
             )}
           </div>
         ) : message.type === "image_group" ? (
-          <div className="flex flex-col items-start gap-1" style={{ maxWidth: IMAGE_MAX_WIDTH_PX + 'px', minWidth: '50%' }}>
+          <div className="flex flex-col items-start gap-1" style={{ maxWidth: IMAGE_MAX_WIDTH_PX + 'px' }}>
             <div className="grid gap-1" style={{ gridTemplateColumns: (message.images?.length || 0) <= 1 ? '1fr' : '1fr 1fr' }}>
               {(message.images || []).slice(0,4).map((img, idx)=> (
                 <div key={idx} className={(message.images?.length===3 && idx===0)? 'col-span-2 md:col-span-1 row-span-2':''} style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }}>
