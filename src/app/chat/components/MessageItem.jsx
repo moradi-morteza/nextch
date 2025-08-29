@@ -1,7 +1,10 @@
 import styles from "./MessageItem.module.scss";
 import { IMAGE_MAX_WIDTH_PX, IMAGE_MAX_HEIGHT_PX } from "../config.js";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import ImageSlider from "./ImageSlider.jsx";
+
+const AudioMessage = dynamic(() => import("./AudioMessage.jsx"), { ssr: false });
 
 export default function MessageItem({ message }) {
   const isMe = message.from === "me";
@@ -14,7 +17,7 @@ export default function MessageItem({ message }) {
     setShowSlider(true);
   };
   return (
-    <li className={`flex ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"}`}>
+    <li className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"}`}>
       <div
         className={
           isSystem
@@ -75,6 +78,8 @@ export default function MessageItem({ message }) {
               </span>
             )}
           </div>
+        ) : message.type === "audio" ? (
+          <AudioMessage url={message.content} duration={message.meta?.duration} variant={isMe ? 'me' : 'them'} />
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}

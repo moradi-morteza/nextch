@@ -135,7 +135,7 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
       <div className="w-[min(520px,92vw)] rounded-2xl bg-white shadow-xl p-4 text-center">
         <div className="flex items-center justify-center gap-3 mb-3">
-          <span className={`inline-block rounded-full ${recording ? 'bg-red-500 animate-pulse' : 'bg-gray-300'} `} style={{ width: 12, height: 12 }} />
+          <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-gray-300'} `} style={{ width: 12, height: 12 }} />
           <span className="font-mono text-lg">{mm}:{ss}</span>
         </div>
         <div className="text-sm text-gray-500 mb-2">Voice recorder</div>
@@ -160,3 +160,12 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
     </div>
   );
 }
+
+/* simple fade in/out animation for the red dot */
+<style jsx>{`
+  .fade-dot { animation: fadeInOut 1.1s ease-in-out infinite; }
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+`}</style>
