@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./ChatComposer.module.scss";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -91,12 +91,23 @@ export default function ChatComposer({ onSend, onVoice }) {
     setRecording(false);
   };
 
+  // Use a textarea so Enter inserts a newline. Send with Ctrl/Cmd+Enter.
+  const textAreaRef = useRef(null);
   const onKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       handleSend();
     }
   };
+
+  const autoResize = () => {
+    const el = textAreaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const max = 120; // px, ~6 lines
+    el.style.height = Math.min(el.scrollHeight, max) + "px";
+  };
+  useEffect(() => { autoResize(); }, [text]);
 
   const onMicPointerDown = (e) => {
     pointerStartX.current = e.clientX ?? (e.touches?.[0]?.clientX || 0);
@@ -147,12 +158,14 @@ export default function ChatComposer({ onSend, onVoice }) {
                 <MoodRoundedIcon fontSize="medium" />
               </IconButton>
             </Tooltip>
-            <input
+            <textarea
+              ref={textAreaRef}
               dir="rtl"
-              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2"
+              rows={1}
+              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2 resize-none leading-6"
               placeholder="اینجا بنویسید ..."
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => { setText(e.target.value); }}
               onKeyDown={onKeyDown}
             />
             {text.trim().length === 0 && (

@@ -20,7 +20,7 @@
   --tg-bottombar-shadow: 0 -6px 12px -8px rgb(0 0 0 / 0.12);
 
   /* Chat bubble defaults */
-  --bubble-me-bg: #d1e9ff;    /* outgoing bubble */
+  --bubble-me-bg: #e6fcce;    /* outgoing bubble (light green) */
   --bubble-them-bg: #f1f5f9;  /* incoming bubble */
 }
 
