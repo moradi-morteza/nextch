@@ -65,7 +65,7 @@ export default function ChatScreen() {
       <main className="h-[100dvh] w-full flex flex-col bg-white overflow-hidden">
         <ChatHeader title="Morteza" status="online" avatar="M" />
 
-        <ChatBackground scrollRef={listRef} image="/background.jpg">
+        <ChatBackground scrollRef={listRef}>
           <ul className="space-y-1.5">
             {messages.map((m) => (
               <MessageItem key={m.id} message={m} />

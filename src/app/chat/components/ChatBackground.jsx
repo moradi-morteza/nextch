@@ -1,6 +1,6 @@
 import styles from "./ChatBackground.module.scss";
 
-export default function ChatBackground({ children, image = "/background.jpg", scrollRef }) {
+export default function ChatBackground({ children, image = "/patterns/pattern-12.svg", scrollRef }) {
   return (
     <section
       ref={scrollRef}
