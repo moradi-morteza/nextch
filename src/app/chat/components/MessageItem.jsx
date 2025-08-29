@@ -1,4 +1,5 @@
 import styles from "./MessageItem.module.scss";
+import { IMAGE_MAX_WIDTH_PX, IMAGE_MAX_HEIGHT_PX } from "../config.js";
 
 export default function MessageItem({ message }) {
   const isMe = message.from === "me";
@@ -14,6 +15,26 @@ export default function MessageItem({ message }) {
           <span className="whitespace-pre-wrap break-words text-right block">
             {message.content}
           </span>
+        ) : message.type === "image" ? (
+          <div className="flex flex-col items-start gap-1">
+            <div
+              className="rounded-lg overflow-hidden"
+              style={{
+                maxWidth: IMAGE_MAX_WIDTH_PX + "px",
+                maxHeight: IMAGE_MAX_HEIGHT_PX + "px",
+              }}
+            >
+              <img
+                src={message.content}
+                alt={message.caption || "image"}
+                className="block w-full h-auto"
+                style={{ maxHeight: IMAGE_MAX_HEIGHT_PX + "px", objectFit: "contain" }}
+              />
+            </div>
+            {message.caption && (
+              <span className="text-right block whitespace-pre-wrap break-words">{message.caption}</span>
+            )}
+          </div>
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}

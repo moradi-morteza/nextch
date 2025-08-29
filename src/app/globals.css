@@ -8,7 +8,7 @@
 
   /* Telegram-like background overlay colors */
   --tg-grad-1: rgba(255, 238, 95, 0.55);   /* warm yellow */
-  --tg-grad-2: rgba(18, 213, 148, 0.55);   /* emerald/green */
+  --tg-grad-2: rgba(29, 229, 162, 0.55);   /* emerald/green */
   --tg-grad-3: rgba(31, 109, 238, 0.47);   /* soft blue accent */
   --tg-grad-opacity: 0.85;                 /* overlay global opacity */
 

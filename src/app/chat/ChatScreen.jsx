@@ -7,6 +7,7 @@ import ChatHeader from "./components/ChatHeader.jsx";
 import ChatBackground from "./components/ChatBackground.jsx";
 import MessageItem from "./components/MessageItem.jsx";
 import ChatComposer from "./components/ChatComposer.jsx";
+import { MAX_UPLOAD_MB } from "./config.js";
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
@@ -69,7 +70,26 @@ export default function ChatScreen() {
           </ul>
         </ChatBackground>
 
-        <ChatComposer onSend={handleSend} onVoice={handleVoice} showCommands={false} />
+        <ChatComposer
+          onSend={handleSend}
+          onVoice={handleVoice}
+          onSendImage={({ url, caption, width, height }) =>
+            setMessages((m) => [
+              ...m,
+              {
+                id: Date.now(),
+                type: "image",
+                content: url,
+                caption: caption || "",
+                meta: { width, height },
+                from: "me",
+                ts: Date.now(),
+              },
+            ])
+          }
+          maxUploadMB={MAX_UPLOAD_MB}
+          showCommands={false}
+        />
       </main>
     </ThemeProvider>
   );

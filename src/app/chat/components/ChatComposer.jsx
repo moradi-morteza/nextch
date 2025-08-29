@@ -10,11 +10,13 @@ import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 
-export default function ChatComposer({ onSend, onVoice }) {
+export default function ChatComposer({ onSend, onVoice, onSendImage, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [cancelSlide, setCancelSlide] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
+  const [imagePreview, setImagePreview] = useState(null); // { url, file, width, height }
+  const [caption, setCaption] = useState("");
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const pointerStartX = useRef(0);
@@ -109,6 +111,38 @@ export default function ChatComposer({ onSend, onVoice }) {
   };
   useEffect(() => { autoResize(); }, [text]);
 
+  const onPickFiles = async (evt) => {
+    const file = evt.target.files?.[0];
+    evt.target.value = ""; // allow picking same file again later
+    if (!file) return;
+    const limit = maxUploadMB * 1024 * 1024;
+    if (!file.type.startsWith("image/")) {
+      alert("Only images are supported right now.");
+      return;
+    }
+    if (file.size > limit) {
+      alert(`File exceeds ${maxUploadMB}MB limit.`);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => setImagePreview({ url, file, width: img.width, height: img.height });
+    img.src = url;
+  };
+
+  const cancelImage = () => {
+    if (imagePreview?.url) URL.revokeObjectURL(imagePreview.url);
+    setImagePreview(null);
+    setCaption("");
+  };
+
+  const sendImage = () => {
+    if (!imagePreview) return;
+    onSendImage?.({ url: imagePreview.url, caption, width: imagePreview.width, height: imagePreview.height });
+    setImagePreview(null);
+    setCaption("");
+  };
+
   const onMicPointerDown = (e) => {
     pointerStartX.current = e.clientX ?? (e.touches?.[0]?.clientX || 0);
     startRecording();
@@ -151,6 +185,24 @@ export default function ChatComposer({ onSend, onVoice }) {
               </IconButton>
             </div>
           </div>
+        ) : imagePreview ? (
+          <div className="w-full flex items-start gap-2 py-2">
+            <img src={imagePreview.url} alt="preview" className="w-24 h-24 object-cover rounded-lg border" />
+            <div className="flex-1 min-w-0">
+              <textarea
+                dir="rtl"
+                rows={2}
+                className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none border rounded-lg"
+                placeholder="کپشن اختیاری"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+              />
+              <div className="mt-2 flex gap-2 justify-end">
+                <IconButton onClick={cancelImage} aria-label="Cancel" size="small">لغو</IconButton>
+                <IconButton onClick={sendImage} aria-label="Send image" color="primary" size="small">ارسال</IconButton>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className={styles.row}>
             <Tooltip title="Emoji">
@@ -171,7 +223,7 @@ export default function ChatComposer({ onSend, onVoice }) {
             {text.trim().length === 0 && (
               <>
                 <label className="cursor-pointer">
-                  <input type="file" accept="image/*,video/*,audio/*" multiple className="hidden" />
+                  <input type="file" accept="image/*" multiple={false} className="hidden" onChange={onPickFiles} />
                   <Tooltip title="Attach file">
                     <IconButton aria-label="Attach" size="medium" component="span" sx={{ p: 0.5 }}>
                       <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
