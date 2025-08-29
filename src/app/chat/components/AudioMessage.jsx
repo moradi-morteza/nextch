@@ -72,7 +72,7 @@ export default function AudioMessage({ url, duration, variant = 'me' }) {
   };
 
   return (
-    <div className="flex items-center gap-2 w-full" style={{ width: 240 }}>
+    <div className="flex items-center gap-2 w-full" style={{ width: '100%' }}>
       <IconButton onClick={toggle} disabled={!ready} size="small" aria-label={playing ? "Pause" : "Play"}>
         {playing ? <PauseRoundedIcon fontSize="small" /> : <PlayArrowRoundedIcon fontSize="small" />}
       </IconButton>
