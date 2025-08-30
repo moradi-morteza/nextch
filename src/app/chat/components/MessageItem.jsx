@@ -4,10 +4,11 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import ImageSlider from "./ImageSlider.jsx";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 const AudioMessage = dynamic(() => import("./AudioMessage.jsx"), { ssr: false });
 
-export default function MessageItem({ message }) {
+export default function MessageItem({ message, selectionMode = false, isSelected = false, onSelect }) {
   const isMe = message.from === "me";
   const isSystem = message.type === 'system' || message.from === 'system';
   const [showSlider, setShowSlider] = useState(false);
@@ -42,25 +43,95 @@ export default function MessageItem({ message }) {
       window.open(file, '_blank');
     }
   };
+  const canSelect = isMe && !isSystem; // Only user's own non-system messages can be selected
+  const [longPressTimer, setLongPressTimer] = useState(null);
+  
+  const handleMessageClick = (e) => {
+    if (selectionMode && canSelect) {
+      e.preventDefault();
+      e.stopPropagation();
+      onSelect?.();
+    }
+  };
+
+  const handleRightClick = (e) => {
+    if (canSelect && !selectionMode) {
+      e.preventDefault();
+      e.stopPropagation();
+      onSelect?.();
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    if (!canSelect) return;
+    
+    const timer = setTimeout(() => {
+      if (!selectionMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Prevent text selection
+        document.getSelection().removeAllRanges();
+        onSelect?.();
+      }
+    }, 500);
+    
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
   return (
     <li className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"}`}>
+      {selectionMode && canSelect && (
+        <div className="mr-2">
+          <div 
+            className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center cursor-pointer ${
+              isSelected ? 'bg-green-500' : 'bg-transparent'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect?.();
+            }}
+          >
+            {isSelected && (
+              <CheckRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
+            )}
+          </div>
+        </div>
+      )}
       <div
         className={
           isSystem
             ? "px-2 py-2 text-[14px] leading-4 rounded-lg bg-black/45 text-white mx-auto backdrop-blur-sm"
             : `${styles.bubble} px-3 py-2 text-[15px] leading-snug rounded-2xl shadow-sm ${
                 isMe ? `${styles.me} bubble-me` : `${styles.them} bubble-them`
-              }`
+              } ${selectionMode && canSelect ? 'cursor-pointer' : ''} ${isSelected ? 'ring-2 ring-blue-400' : ''}`
         }
-        style={
-          isSystem
-            ? undefined
-            : {
-                direction: 'rtl',
-                unicodeBidi: 'isolate-override',
-                ...(message.type === 'audio' ? { minWidth: '50%' } : {}),
-              }
-        }
+        onClick={handleMessageClick}
+        onContextMenu={handleRightClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
+        style={{
+          ...((isSystem) ? undefined : {
+            direction: 'rtl',
+            unicodeBidi: 'isolate-override',
+            ...(message.type === 'audio' ? { minWidth: '50%' } : {}),
+          }),
+          ...(selectionMode && canSelect ? { userSelect: 'none', WebkitUserSelect: 'none' } : {})
+        }}
       >
         {isSystem ? (
           <span className="whitespace-pre-wrap text-center block">{message.content}</span>
