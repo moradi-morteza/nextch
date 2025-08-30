@@ -3,6 +3,7 @@ import { IMAGE_MAX_WIDTH_PX, IMAGE_MAX_HEIGHT_PX } from "../config.js";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import ImageSlider from "./ImageSlider.jsx";
+import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 
 const AudioMessage = dynamic(() => import("./AudioMessage.jsx"), { ssr: false });
 
@@ -15,6 +16,31 @@ export default function MessageItem({ message }) {
     if (!images || images.length === 0) return;
     setStartIndex(idx);
     setShowSlider(true);
+  };
+
+  const truncateFileName = (fileName, maxLength = 35) => {
+    if (!fileName || fileName.length <= maxLength) return fileName;
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExt.slice(0, maxLength - extension.length - 4); // -4 for "..." and "."
+    return `${truncatedName}...${extension}`;
+  };
+
+  const handleFileClick = (file, filename) => {
+    if (file instanceof File || file instanceof Blob) {
+      // Create temporary URL and download
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else if (typeof file === 'string') {
+      // If it's already a URL, open it
+      window.open(file, '_blank');
+    }
   };
   return (
     <li className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"}`}>
@@ -82,6 +108,28 @@ export default function MessageItem({ message }) {
             </div>
             {message.caption && (
               <span className="text-right block whitespace-pre-wrap break-words" style={{ maxWidth: IMAGE_MAX_WIDTH_PX + 'px', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                {message.caption}
+              </span>
+            )}
+          </div>
+        ) : message.type === "file" ? (
+          <div className="flex flex-col items-start gap-1 w-full" style={{ maxWidth: '300px' }}>
+            <div 
+              className="flex items-center gap-3 w-full cursor-pointer hover:bg-gray-50 rounded-lg p-1 transition-colors"
+              onClick={() => handleFileClick(message.content, message.name)}
+            >
+              <div className="flex-1 min-w-0 overflow-hidden" dir="ltr">
+                <div className="text-sm font-medium text-gray-800 truncate" title={message.name}>
+                  {truncateFileName(message.name)}
+                </div>
+                <div className="text-xs text-gray-500">{message.size ? `${(message.size / 1024 / 1024).toFixed(1)}MB` : ''}</div>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                <InsertDriveFileRoundedIcon sx={{ fontSize: 24, color: 'white' }} />
+              </div>
+            </div>
+            {message.caption && (
+              <span className="text-right block whitespace-pre-wrap break-words w-full" style={{ maxWidth: '300px', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 {message.caption}
               </span>
             )}

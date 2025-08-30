@@ -9,9 +9,13 @@ import AttachFileRoundedIcon from "@mui/icons-material/AttachFileRounded";
 import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
+import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
+import PhotoLibraryRoundedIcon from "@mui/icons-material/PhotoLibraryRounded";
+import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import VoiceRecorder from "./VoiceRecorder.jsx";
 
-export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImage, onSendImages, maxUploadMB = 5, showCommands = false }) {
+export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImage, onSendImages, onSendFile, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [cancelSlide, setCancelSlide] = useState(false);
@@ -20,10 +24,13 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
   const [imagePreview, setImagePreview] = useState(null); // single
   const [images, setImages] = useState([]); // multiple [{url,file,width,height}]
   const [caption, setCaption] = useState("");
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [filePreview, setFilePreview] = useState(null); // for file attachments
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const pointerStartX = useRef(0);
   const recordTimerRef = useRef(null);
+  const attachMenuRef = useRef(null);
 
   const playSendSound = () => {
     try {
@@ -114,7 +121,20 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
   };
   useEffect(() => { autoResize(); }, [text]);
 
-  const onPickFiles = async (evt) => {
+  // Close attach menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(event.target)) {
+        setShowAttachMenu(false);
+      }
+    };
+    if (showAttachMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showAttachMenu]);
+
+  const onPickImages = async (evt) => {
     const files = Array.from(evt.target.files || []);
     evt.target.value = "";
     if (!files.length) return;
@@ -125,6 +145,39 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
     const metas = await Promise.all(valids.map((f) => new Promise((res)=>{ const url = URL.createObjectURL(f); const i=new Image(); i.onload=()=>res({url,file:f,width:i.width,height:i.height}); i.src=url; })));
     if (metas.length === 1) { setImagePreview(metas[0]); setImages([]); }
     else { setImages(metas); setImagePreview(null); }
+    setShowAttachMenu(false);
+  };
+
+  const onPickFile = (evt) => {
+    const file = evt.target.files?.[0];
+    evt.target.value = "";
+    if (!file) return;
+    const limit = 10 * 1024 * 1024; // 10MB for files
+    if (file.size > limit) {
+      alert("File size must be less than 10MB");
+      return;
+    }
+    setFilePreview({ file, name: file.name, size: file.size, type: file.type });
+    setShowAttachMenu(false);
+  };
+
+  const onCameraCapture = async (evt) => {
+    const file = evt.target.files?.[0];
+    evt.target.value = "";
+    if (!file) return;
+    const limit = maxUploadMB * 1024 * 1024;
+    if (file.size > limit) {
+      alert(`Image must be less than ${maxUploadMB}MB`);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      setImagePreview({url, file, width: img.width, height: img.height});
+      setImages([]);
+    };
+    img.src = url;
+    setShowAttachMenu(false);
   };
 
   const cancelImage = () => {
@@ -142,6 +195,18 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
 
   const cancelImages = () => { images.forEach(i=> i.url && URL.revokeObjectURL(i.url)); setImages([]); setCaption(""); };
   const sendImages = () => { if (!images.length) return; onSendImages?.({ items: images, caption }); setImages([]); setCaption(""); };
+
+  const cancelFile = () => {
+    setFilePreview(null);
+    setCaption("");
+  };
+
+  const sendFile = () => {
+    if (!filePreview) return;
+    onSendFile?.({ file: filePreview.file, name: filePreview.name, size: filePreview.size, type: filePreview.type, caption });
+    setFilePreview(null);
+    setCaption("");
+  };
 
   const onMicPointerDown = (e) => {
     pointerStartX.current = e.clientX ?? (e.touches?.[0]?.clientX || 0);
@@ -164,6 +229,14 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
     return `${mm}:${ss}`;
   };
 
+  const truncateFileName = (fileName, maxLength = 15) => {
+    if (fileName.length <= maxLength) return fileName;
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.slice(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExt.slice(0, maxLength - extension.length - 4); // -4 for "..." and "."
+    return `${truncatedName}...${extension}`;
+  };
+
   return (
     <div className={`tg-bottombar shrink-0 ${styles.root}`}>
       <div className="mx-auto max-w-3xl px-2">
@@ -183,6 +256,34 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
               >
                 <StopRoundedIcon />
               </IconButton>
+            </div>
+          </div>
+        ) : filePreview ? (
+          <div className="w-full flex items-start gap-2 py-2">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                <InsertDriveFileRoundedIcon sx={{ fontSize: 20, color: 'white' }} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-800" dir="ltr" title={filePreview.name}>
+                  {truncateFileName(filePreview.name)}
+                </span>
+                <span className="text-xs text-gray-500">{(filePreview.size / 1024 / 1024).toFixed(1)}MB</span>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <textarea
+                dir="rtl"
+                rows={2}
+                className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none rounded-lg"
+                placeholder="کپشن اختیاری"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+              />
+              <div className="mt-2 flex gap-2 justify-end">
+                <IconButton onClick={cancelFile} size="small">لغو</IconButton>
+                <IconButton onClick={sendFile} color="primary" size="small">ارسال</IconButton>
+              </div>
             </div>
           </div>
         ) : images.length > 0 ? (
@@ -251,16 +352,37 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
               onKeyDown={onKeyDown}
             />
             {text.trim().length === 0 && (
-              <>
-                <label className="cursor-pointer">
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} />
-                  <Tooltip title="Attach file">
-                    <IconButton aria-label="Attach" size="medium" component="span" sx={{ p: 0.5 }}>
-                      <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
-                    </IconButton>
-                  </Tooltip>
-                </label>
-              </>
+              <div className="relative" ref={attachMenuRef}>
+                <Tooltip title="Attach file">
+                  <IconButton 
+                    aria-label="Attach" 
+                    size="medium" 
+                    onClick={() => setShowAttachMenu(!showAttachMenu)}
+                    sx={{ p: 0.5 }}
+                  >
+                    <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
+                  </IconButton>
+                </Tooltip>
+                {showAttachMenu && (
+                  <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-lg border p-1 min-w-[160px]">
+                    <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onCameraCapture} />
+                      <PhotoCameraRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
+                      <span className="text-sm text-gray-700">دوربین</span>
+                    </label>
+                    <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={onPickImages} />
+                      <PhotoLibraryRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
+                      <span className="text-sm text-gray-700">گالری</span>
+                    </label>
+                    <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
+                      <input type="file" className="hidden" onChange={onPickFile} />
+                      <InsertDriveFileRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
+                      <span className="text-sm text-gray-700">فایل</span>
+                    </label>
+                  </div>
+                )}
+              </div>
             )}
             {text.trim().length > 0 ? (
               <Tooltip title="Send">
