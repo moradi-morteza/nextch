@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 
-export default function AudioMessage({ url, duration, variant = 'me' }) {
+export default function AudioMessage({ url, duration, variant = 'me', timestamp }) {
   const containerRef = useRef(null);
   const wavesurferRef = useRef(null);
   const [ready, setReady] = useState(false);
@@ -26,7 +26,7 @@ export default function AudioMessage({ url, duration, variant = 'me' }) {
       waveColor: baseColors.wave,
       progressColor: baseColors.progress,
       cursorColor: "transparent",
-      height: 44,
+      height: 32,
       barWidth: 2,
       barGap: 2,
       barRadius: 2,
@@ -72,15 +72,29 @@ export default function AudioMessage({ url, duration, variant = 'me' }) {
   };
 
   return (
-    <div className="flex items-center gap-2 w-full" style={{ width: '100%' }}>
-      <IconButton onClick={toggle} disabled={!ready} size="small" aria-label={playing ? "Pause" : "Play"}>
-        {playing ? <PauseRoundedIcon fontSize="small" /> : <PlayArrowRoundedIcon fontSize="small" />}
-      </IconButton>
-      <div className="flex-1 min-w-[120px]">
-        <div ref={containerRef} style={{ width: '100%', height: 36 }} />
+    <div className="flex flex-col gap-1 w-full" dir="rtl">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-[120px] pb-2">
+          <div ref={containerRef} style={{ width: '100%', height: 32, maxHeight: 32, overflow: 'hidden' }} />
+        </div>
+        <button 
+          onClick={toggle} 
+          disabled={!ready}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-400 transition-colors"
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          {playing ? (
+            <PauseRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
+          ) : (
+            <PlayArrowRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
+          )}
+        </button>
       </div>
-      <div className="shrink-0 text-[12px] text-gray-700 font-mono text-right" style={{ width: 42 }}>
-        {fmt(current || duration || 0)}
+      <div className="flex justify-between items-center text-[11px] text-gray-500">
+        {timestamp && (
+          <span>{new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+        )}
+        <span>{fmt(current || duration || 0)}</span>
       </div>
     </div>
   );

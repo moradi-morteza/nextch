@@ -87,7 +87,7 @@ export default function MessageItem({ message }) {
             )}
           </div>
         ) : message.type === "audio" ? (
-          <AudioMessage url={message.content} duration={message.meta?.duration} variant={isMe ? 'me' : 'them'} />
+          <AudioMessage url={message.content} duration={message.meta?.duration} variant={isMe ? 'me' : 'them'} timestamp={message.ts} />
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}
@@ -98,14 +98,7 @@ export default function MessageItem({ message }) {
             onClose={() => setShowSlider(false)}
           />
         )}
-        {showSlider && (
-          <ImageSlider
-            images={(message.type === 'image_group' ? message.images : [{ url: message.content, caption: message.caption }])}
-            startIndex={startIndex}
-            onClose={() => setShowSlider(false)}
-          />
-        )}
-        {!isSystem && (
+        {!isSystem && message.type !== 'audio' && (
           <div className="mt-1 text-[11px] text-gray-500 text-right">
             {new Date(message.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </div>
