@@ -80,6 +80,9 @@ export default function ChatScreen() {
           onVoiceMessage={({ url, duration }) =>
             setMessages((m) => [...m, makeAudio({ url, duration })])
           }
+          onSendImage={({ url, caption, width, height }) =>
+            setMessages((m) => [...m, makeImage({ image: { url, width, height }, caption })])
+          }
           onSendImages={({ items, caption }) =>
             setMessages((m) => [
               ...m,

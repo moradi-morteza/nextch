@@ -11,6 +11,7 @@ import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 import PhotoLibraryRoundedIcon from "@mui/icons-material/PhotoLibraryRounded";
+import ImageRoundedIcon from "@mui/icons-material/ImageRounded";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import VoiceRecorder from "./VoiceRecorder.jsx";
@@ -26,6 +27,8 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
   const [caption, setCaption] = useState("");
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [filePreview, setFilePreview] = useState(null); // for file attachments
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasCamera, setHasCamera] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const pointerStartX = useRef(0);
@@ -120,6 +123,28 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
     el.style.height = Math.min(el.scrollHeight, max) + "px";
   };
   useEffect(() => { autoResize(); }, [text]);
+
+  // Detect device capabilities
+  useEffect(() => {
+    // Check if mobile device
+    const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(checkMobile);
+
+    // Check camera availability
+    const checkCamera = async () => {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const hasVideoDevice = devices.some(device => device.kind === 'videoinput');
+          setHasCamera(hasVideoDevice);
+        }
+      } catch (error) {
+        setHasCamera(false);
+      }
+    };
+    
+    checkCamera();
+  }, []);
 
   // Close attach menu when clicking outside
   useEffect(() => {
@@ -365,16 +390,32 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
                 </Tooltip>
                 {showAttachMenu && (
                   <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-lg border p-1 min-w-[160px]">
-                    <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
-                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onCameraCapture} />
-                      <PhotoCameraRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
-                      <span className="text-sm text-gray-700">دوربین</span>
-                    </label>
+                    {/* Camera option - only show on mobile with camera */}
+                    {isMobile && hasCamera && (
+                      <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
+                        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onCameraCapture} />
+                        <PhotoCameraRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
+                        <span className="text-sm text-gray-700">دوربین</span>
+                      </label>
+                    )}
+                    
+                    {/* Images option - different labels for mobile vs desktop */}
                     <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
                       <input type="file" accept="image/*" multiple className="hidden" onChange={onPickImages} />
-                      <PhotoLibraryRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
-                      <span className="text-sm text-gray-700">گالری</span>
+                      {isMobile ? (
+                        <>
+                          <PhotoLibraryRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
+                          <span className="text-sm text-gray-700">گالری</span>
+                        </>
+                      ) : (
+                        <>
+                          <ImageRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
+                          <span className="text-sm text-gray-700">تصاویر</span>
+                        </>
+                      )}
                     </label>
+                    
+                    {/* File option - always available */}
                     <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
                       <input type="file" className="hidden" onChange={onPickFile} />
                       <InsertDriveFileRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
