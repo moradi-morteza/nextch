@@ -77,16 +77,16 @@ export default function AudioMessage({ url, duration, variant = 'me', timestamp 
         <div className="flex-1 min-w-[120px] pb-2">
           <div ref={containerRef} style={{ width: '100%', height: 32, maxHeight: 32, overflow: 'hidden' }} />
         </div>
-        <button 
-          onClick={toggle} 
+        <button
+          onClick={toggle}
           disabled={!ready}
           className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-400 transition-colors"
           aria-label={playing ? "Pause" : "Play"}
         >
           {playing ? (
-            <PauseRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
+            <PauseRoundedIcon sx={{ fontSize: 25, color: 'white' }} />
           ) : (
-            <PlayArrowRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
+            <PlayArrowRoundedIcon sx={{ fontSize: 28, color: 'white' }} />
           )}
         </button>
       </div>

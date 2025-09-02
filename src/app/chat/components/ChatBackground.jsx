@@ -2,7 +2,7 @@ import styles from "./ChatBackground.module.scss";
 
 export default function ChatBackground({
                                            children,
-                                           image = "/patterns/pattern-12.svg",
+                                           image = "/patterns/pattern-2.svg",
                                            scrollRef,
                                            patternOpacity = 0.25 // 0..1 (1 = fully visible)
                                        }) {
