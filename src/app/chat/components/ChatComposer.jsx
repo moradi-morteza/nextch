@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./ChatComposer.module.scss";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import MoodRoundedIcon from "@mui/icons-material/MoodRounded";
+import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 import AttachFileRoundedIcon from "@mui/icons-material/AttachFileRounded";
 import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
@@ -15,13 +15,15 @@ import ImageRoundedIcon from "@mui/icons-material/ImageRounded";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import VoiceRecorder from "./VoiceRecorder.jsx";
+import VideoRecorder from "./VideoRecorder.jsx";
 
-export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImage, onSendImages, onSendFile, maxUploadMB = 5, showCommands = false }) {
+export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMessage, onSendImage, onSendImages, onSendFile, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [cancelSlide, setCancelSlide] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [showRecorder, setShowRecorder] = useState(false);
+  const [showVideoRecorder, setShowVideoRecorder] = useState(false);
   const [imagePreview, setImagePreview] = useState(null); // single
   const [images, setImages] = useState([]); // multiple [{url,file,width,height}]
   const [caption, setCaption] = useState("");
@@ -361,9 +363,9 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
           </div>
         ) : (
           <div className={styles.row}>
-            <Tooltip title="Emoji">
-              <IconButton aria-label="Emoji" size="medium" sx={{ p: 0.5 }}>
-                <MoodRoundedIcon fontSize="medium" />
+            <Tooltip title="Record video">
+              <IconButton aria-label="Record video" size="medium" sx={{ p: 0.5 }} onClick={() => setShowVideoRecorder(true)}>
+                <VideocamRoundedIcon fontSize="medium" />
               </IconButton>
             </Tooltip>
             <textarea
@@ -453,6 +455,16 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onSendImag
           onSubmit={({ url, blob, duration }) => {
             onVoiceMessage?.({ url, duration, blob });
             setShowRecorder(false);
+          }}
+        />
+      )}
+      {showVideoRecorder && (
+        <VideoRecorder
+          open
+          onClose={() => setShowVideoRecorder(false)}
+          onSubmit={({ url, blob, duration, width, height }) => {
+            onVideoMessage?.({ url, duration, width, height, blob });
+            setShowVideoRecorder(false);
           }}
         />
       )}

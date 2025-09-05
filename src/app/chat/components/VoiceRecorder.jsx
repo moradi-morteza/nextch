@@ -132,15 +132,15 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
   const ss = String(seconds % 60).padStart(2, "0");
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
-      <div className="w-[min(520px,92vw)] rounded-2xl bg-white shadow-xl p-4 text-center">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
+      <div className="w-[min(520px,92vw)] p-4 text-center text-white">
         <div className="flex items-center justify-center gap-3 mb-3">
-          <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-gray-300'} `} style={{ width: 12, height: 12 }} />
+          <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-white/50'} `} style={{ width: 12, height: 12 }} />
           <span className="font-mono text-lg">{mm}:{ss}</span>
         </div>
-        <div className="text-sm text-gray-500 mb-2">Voice recorder</div>
+        <div className="text-sm text-white/80 mb-2">Voice recorder</div>
         {errMsg && (
-          <div className="mx-auto mb-3 max-w-md text-[12px] text-red-600">{errMsg}</div>
+          <div className="mx-auto mb-3 max-w-md text-[12px] text-red-300">{errMsg}</div>
         )}
 
         <div className="flex items-center justify-center gap-3">
@@ -148,13 +148,13 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
             <button onClick={requestAndStart} className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">{granted ? 'Start' : 'Allow & Start'}</button>
           ) : (
             <>
-              <button onClick={pause} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+              <button onClick={pause} className="px-4 py-2 rounded bg-white/10 text-white hover:bg-white/20">
                 {paused ? 'Resume' : 'Pause'}
               </button>
               <button onClick={stopAndSubmit} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500">Submit</button>
             </>
           )}
-          <button onClick={cancel} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
+          <button onClick={cancel} className="px-4 py-2 rounded bg-white/10 text-white hover:bg-white/20">Cancel</button>
         </div>
       </div>
       <style jsx>{` // fade in fade out record animation

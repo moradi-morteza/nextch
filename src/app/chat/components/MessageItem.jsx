@@ -7,6 +7,7 @@ import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRound
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 const AudioMessage = dynamic(() => import("./AudioMessage.jsx"), { ssr: false });
+const VideoMessage = dynamic(() => import("./VideoMessage.jsx"), { ssr: false });
 
 export default function MessageItem({ message, selectionMode = false, isSelected = false, onSelect }) {
   const isMe = message.from === "me";
@@ -207,6 +208,8 @@ export default function MessageItem({ message, selectionMode = false, isSelected
           </div>
         ) : message.type === "audio" ? (
           <AudioMessage url={message.content} duration={message.meta?.duration} variant={isMe ? 'me' : 'them'} timestamp={message.ts} />
+        ) : message.type === "video" ? (
+          <VideoMessage url={message.content} duration={message.meta?.duration} width={message.meta?.width} height={message.meta?.height} variant={isMe ? 'me' : 'them'} timestamp={message.ts} />
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}
@@ -217,7 +220,7 @@ export default function MessageItem({ message, selectionMode = false, isSelected
             onClose={() => setShowSlider(false)}
           />
         )}
-        {!isSystem && message.type !== 'audio' && (
+        {!isSystem && message.type !== 'audio' && message.type !== 'video' && (
           <div className="mt-1 text-[11px] text-gray-500 text-right">
             {new Date(message.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </div>

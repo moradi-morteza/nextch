@@ -7,7 +7,7 @@ import ChatHeader from "./components/ChatHeader.jsx";
 import ChatBackground from "./components/ChatBackground.jsx";
 import MessageItem from "./components/MessageItem.jsx";
 import ChatComposer from "./components/ChatComposer.jsx";
-import { makeText, makeImage, makeImageGroup, makeAudio, makeFile, makeSystem } from "./messages.js";
+import { makeText, makeImage, makeImageGroup, makeAudio, makeVideo, makeFile, makeSystem } from "./messages.js";
 import { MAX_UPLOAD_MB } from "./config.js";
 import IconButton from "@mui/material/IconButton";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
@@ -128,6 +128,9 @@ export default function ChatScreen() {
           }
           onVoiceMessage={({ url, duration }) =>
             setMessages((m) => [...m, makeAudio({ url, duration })])
+          }
+          onVideoMessage={({ url, duration, width, height }) =>
+            setMessages((m) => [...m, makeVideo({ url, duration, width, height })])
           }
           onSendImage={({ url, caption, width, height }) =>
             setMessages((m) => [...m, makeImage({ image: { url, width, height }, caption })])

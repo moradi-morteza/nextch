@@ -13,6 +13,7 @@ export const MessageType = {
   IMAGE: "image",
   IMAGE_GROUP: "image_group",
   AUDIO: "audio",
+  VIDEO: "video",
   FILE: "file",
   SYSTEM: "system",
 };
@@ -47,6 +48,15 @@ export function makeImageGroup({ images, caption = "", from = "me" }) {
 
 export function makeAudio({ url, duration, from = "me" }) {
   return { ...base(from), type: MessageType.AUDIO, content: url, meta: { duration } };
+}
+
+export function makeVideo({ url, width, height, duration, from = "me" }) {
+  return {
+    ...base(from),
+    type: MessageType.VIDEO,
+    content: url,
+    meta: { width, height, duration },
+  };
 }
 
 export function makeFile({ file, name, size, type, caption = "", from = "me" }) {
