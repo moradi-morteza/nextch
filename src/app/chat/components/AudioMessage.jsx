@@ -5,20 +5,40 @@ import WaveSurfer from "wavesurfer.js";
 import IconButton from "@mui/material/IconButton";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
+import { getMediaUrl } from "../../../utils/mediaStorage";
 
-export default function AudioMessage({ url, duration, variant = 'me', timestamp }) {
+export default function AudioMessage({ url, mediaId, duration, variant = 'me', timestamp }) {
   const containerRef = useRef(null);
   const wavesurferRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
+  const [audioUrl, setAudioUrl] = useState(url);
+  const [loading, setLoading] = useState(false);
+  
   const colorFor = (v, isPlaying) =>
     v === 'me'
       ? { wave: '#a7e0a0', progress: isPlaying ? '#2e7d32' : '#4f7d46' }
       : { wave: '#cbd5e1', progress: isPlaying ? '#2563eb' : '#64748b' };
 
+  // Load audio URL from IndexedDB if mediaId is provided
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (mediaId && !url) {
+      setLoading(true);
+      getMediaUrl(mediaId)
+        .then(mediaUrl => {
+          setAudioUrl(mediaUrl);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Failed to load audio from IndexedDB:', error);
+          setLoading(false);
+        });
+    }
+  }, [mediaId, url]);
+
+  useEffect(() => {
+    if (!containerRef.current || !audioUrl) return;
     // Create a wavesurfer instance like in official docs
     const baseColors = colorFor(variant, playing);
     const ws = WaveSurfer.create({
@@ -32,7 +52,7 @@ export default function AudioMessage({ url, duration, variant = 'me', timestamp 
       barRadius: 2,
       normalize: true,
       interact: true,
-      url,
+      url: audioUrl,
     });
     wavesurferRef.current = ws;
     const onReady = () => setReady(true);
@@ -47,7 +67,7 @@ export default function AudioMessage({ url, duration, variant = 'me', timestamp 
       ws.un("finish", onFinish);
       ws.destroy();
     };
-  }, [url]);
+  }, [audioUrl, variant, playing]);
 
   // Update colors on play state or side change
   useEffect(() => {
@@ -70,6 +90,31 @@ export default function AudioMessage({ url, duration, variant = 'me', timestamp 
     const ss = String(Math.floor(s % 60)).padStart(2, "0");
     return `${mm}:${ss}`;
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-1 w-full" dir="rtl">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-[120px] pb-2 flex items-center justify-center">
+            <div className="text-sm text-gray-500">Loading audio...</div>
+          </div>
+          <button
+            disabled
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-400 transition-colors"
+            aria-label="Loading"
+          >
+            <PlayArrowRoundedIcon sx={{ fontSize: 28, color: 'white' }} />
+          </button>
+        </div>
+        <div className="flex justify-between items-center text-[11px] text-gray-500">
+          {timestamp && (
+            <span>{new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+          )}
+          <span>{fmt(duration || 0)}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-1 w-full" dir="rtl">

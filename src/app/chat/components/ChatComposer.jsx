@@ -452,8 +452,8 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
         <VoiceRecorder
           open
           onClose={() => setShowRecorder(false)}
-          onSubmit={({ url, blob, duration }) => {
-            onVoiceMessage?.({ url, duration, blob });
+          onSubmit={({ mediaId, duration, type }) => {
+            onVoiceMessage?.({ mediaId, duration, type });
             setShowRecorder(false);
           }}
         />
@@ -462,8 +462,8 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
         <VideoRecorder
           open
           onClose={() => setShowVideoRecorder(false)}
-          onSubmit={({ url, blob, duration, width, height }) => {
-            onVideoMessage?.({ url, duration, width, height, blob });
+          onSubmit={({ mediaId, duration, width, height, type }) => {
+            onVideoMessage?.({ mediaId, duration, width, height, type });
             setShowVideoRecorder(false);
           }}
         />
