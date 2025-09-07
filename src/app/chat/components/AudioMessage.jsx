@@ -14,7 +14,8 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [audioUrl, setAudioUrl] = useState(url);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!mediaId && !url);
+  const audioUrlRef = useRef(null);
   
   const colorFor = (v, isPlaying) =>
     v === 'me'
@@ -24,21 +25,51 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
   // Load audio URL from IndexedDB if mediaId is provided
   useEffect(() => {
     if (mediaId && !url) {
+      let cancelled = false;
       setLoading(true);
+      
       getMediaUrl(mediaId)
         .then(mediaUrl => {
-          setAudioUrl(mediaUrl);
-          setLoading(false);
+          if (!cancelled) {
+            // Clean up previous URL
+            if (audioUrlRef.current && audioUrlRef.current !== url) {
+              URL.revokeObjectURL(audioUrlRef.current);
+            }
+            audioUrlRef.current = mediaUrl;
+            setAudioUrl(mediaUrl);
+            setLoading(false);
+          }
         })
         .catch(error => {
-          console.error('Failed to load audio from IndexedDB:', error);
-          setLoading(false);
+          if (!cancelled) {
+            console.error('Failed to load audio from IndexedDB:', error);
+            setLoading(false);
+          }
         });
+        
+      return () => {
+        cancelled = true;
+      };
+    } else if (url) {
+      setAudioUrl(url);
+      setLoading(false);
     }
   }, [mediaId, url]);
 
+  // Cleanup object URLs on unmount
   useEffect(() => {
-    if (!containerRef.current || !audioUrl) return;
+    return () => {
+      if (audioUrlRef.current && audioUrlRef.current !== url) {
+        URL.revokeObjectURL(audioUrlRef.current);
+      }
+    };
+  }, [url]);
+
+  useEffect(() => {
+    if (!containerRef.current || !audioUrl || loading) return;
+    
+    setReady(false);
+    
     // Create a wavesurfer instance like in official docs
     const baseColors = colorFor(variant, playing);
     const ws = WaveSurfer.create({
@@ -55,19 +86,31 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
       url: audioUrl,
     });
     wavesurferRef.current = ws;
-    const onReady = () => setReady(true);
+    
+    const onReady = () => {
+      setReady(true);
+      setPlaying(false);
+    };
     const onTime = (t) => setCurrent(t);
     const onFinish = () => setPlaying(false);
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
+    
     ws.on("ready", onReady);
     ws.on("timeupdate", onTime);
     ws.on("finish", onFinish);
+    ws.on("play", onPlay);
+    ws.on("pause", onPause);
+    
     return () => {
       ws.un("ready", onReady);
       ws.un("timeupdate", onTime);
       ws.un("finish", onFinish);
+      ws.un("play", onPlay);
+      ws.un("pause", onPause);
       ws.destroy();
     };
-  }, [audioUrl, variant, playing]);
+  }, [audioUrl, variant, loading]);
 
   // Update colors on play state or side change
   useEffect(() => {
@@ -77,12 +120,18 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
     ws.setOptions({ progressColor: c.progress, waveColor: c.wave });
   }, [playing, variant]);
 
-  const toggle = () => {
+  const toggle = async () => {
     const ws = wavesurferRef.current;
-    if (!ws) return;
-    // playPause returns a promise in v7; but we only need state after call
-    ws.playPause();
-    setPlaying(ws.isPlaying());
+    if (!ws || !ready) return;
+    
+    try {
+      // playPause returns a promise in v7
+      await ws.playPause();
+      // State is managed by event listeners now
+    } catch (error) {
+      console.error('Error toggling audio playback:', error);
+      setPlaying(false);
+    }
   };
 
   const fmt = (s) => {

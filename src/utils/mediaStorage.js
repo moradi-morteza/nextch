@@ -67,7 +67,16 @@ export async function getMedia(id) {
 
 export async function getMediaUrl(id) {
   try {
-    const data = await getMedia(id);
+    const db = await getDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    
+    const data = await store.get(id);
+    if (!data) {
+      throw new Error(`Media with id ${id} not found`);
+    }
+    
+    // Create URL immediately after getting blob
     return URL.createObjectURL(data.blob);
   } catch (error) {
     console.error('Error creating URL for media:', error);
