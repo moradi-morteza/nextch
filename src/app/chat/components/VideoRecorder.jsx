@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { saveMedia } from "../../../utils/mediaStorage";
+import { newId } from "../messages";
 
 // Simple full-screen overlay video recorder using MediaRecorder + getUserMedia
 export default function VideoRecorder({ open = false, onClose, onSubmit }) {
@@ -138,21 +140,56 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
   const stopAndSubmit = () => {
     const mr = mediaRecorderRef.current;
     if (!mr) return;
-    mr.onstop = () => {
+    mr.onstop = async () => {
       stopTimer();
       const firstTrack = streamRef.current?.getVideoTracks?.()[0];
       const settings = firstTrack?.getSettings?.() || {};
       const blob = new Blob(chunksRef.current, { type: mr.mimeType || "video/webm" });
-      const url = URL.createObjectURL(blob);
-      onSubmit?.({ url, blob, duration: seconds, width: settings.width, height: settings.height });
-      // cleanup
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
+      
+      try {
+        // Generate unique ID for the media
+        const mediaId = newId();
+        
+        // Save to IndexedDB
+        await saveMedia(mediaId, blob, {
+          type: 'video',
+          duration: seconds,
+          width: settings.width,
+          height: settings.height,
+          mimeType: blob.type,
+        });
+        
+        // Pass the media ID instead of URL/blob
+        onSubmit?.({ 
+          mediaId, 
+          duration: seconds, 
+          width: settings.width, 
+          height: settings.height,
+          type: 'video'
+        });
+        
+        // cleanup
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((t) => t.stop());
+          streamRef.current = null;
+        }
+        mediaRecorderRef.current = null;
+        chunksRef.current = [];
+        onClose?.();
+      } catch (error) {
+        console.error('Failed to save video to IndexedDB:', error);
+        // Fallback to old behavior
+        const url = URL.createObjectURL(blob);
+        onSubmit?.({ url, blob, duration: seconds, width: settings.width, height: settings.height });
+        // cleanup
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((t) => t.stop());
+          streamRef.current = null;
+        }
+        mediaRecorderRef.current = null;
+        chunksRef.current = [];
+        onClose?.();
       }
-      mediaRecorderRef.current = null;
-      chunksRef.current = [];
-      onClose?.();
     };
     try {
       mr.stop();
