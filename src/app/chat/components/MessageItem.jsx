@@ -207,23 +207,9 @@ export default function MessageItem({ message, selectionMode = false, isSelected
             )}
           </div>
         ) : message.type === "audio" ? (
-          <AudioMessage 
-            url={message.content} 
-            mediaId={message.mediaId} 
-            duration={message.meta?.duration} 
-            variant={isMe ? 'me' : 'them'} 
-            timestamp={message.ts} 
-          />
+          <AudioMessage url={message.content} duration={message.meta?.duration} variant={isMe ? 'me' : 'them'} timestamp={message.ts} />
         ) : message.type === "video" ? (
-          <VideoMessage 
-            url={message.content} 
-            mediaId={message.mediaId} 
-            duration={message.meta?.duration} 
-            width={message.meta?.width} 
-            height={message.meta?.height} 
-            variant={isMe ? 'me' : 'them'} 
-            timestamp={message.ts} 
-          />
+          <VideoMessage url={message.content} duration={message.meta?.duration} width={message.meta?.width} height={message.meta?.height} variant={isMe ? 'me' : 'them'} timestamp={message.ts} />
         ) : (
           <audio controls className="max-w-full" src={message.content} />
         )}

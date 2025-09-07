@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { saveMedia } from "../../../utils/mediaStorage";
-import { newId } from "../messages";
 
 export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
   const mediaRecorderRef = useRef(null);
@@ -111,46 +109,17 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
   const stopAndSubmit = () => {
     const mr = mediaRecorderRef.current;
     if (!mr) return;
-    mr.onstop = async () => {
+    mr.onstop = () => {
       stopTimer();
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      
-      try {
-        // Generate unique ID for the media
-        const mediaId = newId();
-        
-        // Save to IndexedDB
-        await saveMedia(mediaId, blob, {
-          type: 'audio',
-          duration: seconds,
-          mimeType: blob.type,
-        });
-        
-        // Pass the media ID instead of URL/blob
-        onSubmit?.({ 
-          mediaId, 
-          duration: seconds,
-          type: 'audio'
-        });
-        
-        // cleanup
-        if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
-        mediaRecorderRef.current = null;
-        streamRef.current = null;
-        chunksRef.current = [];
-        onClose?.();
-      } catch (error) {
-        console.error('Failed to save audio to IndexedDB:', error);
-        // Fallback to old behavior
-        const url = URL.createObjectURL(blob);
-        onSubmit?.({ url, blob, duration: seconds });
-        // cleanup
-        if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
-        mediaRecorderRef.current = null;
-        streamRef.current = null;
-        chunksRef.current = [];
-        onClose?.();
-      }
+      const url = URL.createObjectURL(blob);
+      onSubmit?.({ url, blob, duration: seconds });
+      // cleanup
+      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
+      mediaRecorderRef.current = null;
+      streamRef.current = null;
+      chunksRef.current = [];
+      onClose?.();
     };
     try {
       mr.stop();

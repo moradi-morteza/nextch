@@ -126,11 +126,11 @@ export default function ChatScreen() {
           onSendMessage={(text) =>
             setMessages((m) => [...m, makeText({ text })])
           }
-          onVoiceMessage={({ mediaId, duration, url }) =>
-            setMessages((m) => [...m, makeAudio({ mediaId, duration, url })])
+          onVoiceMessage={({ url, duration }) =>
+            setMessages((m) => [...m, makeAudio({ url, duration })])
           }
-          onVideoMessage={({ mediaId, duration, width, height, url }) =>
-            setMessages((m) => [...m, makeVideo({ mediaId, duration, width, height, url })])
+          onVideoMessage={({ url, duration, width, height }) =>
+            setMessages((m) => [...m, makeVideo({ url, duration, width, height })])
           }
           onSendImage={({ url, caption, width, height }) =>
             setMessages((m) => [...m, makeImage({ image: { url, width, height }, caption })])

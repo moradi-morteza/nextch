@@ -46,22 +46,15 @@ export function makeImageGroup({ images, caption = "", from = "me" }) {
   return { ...base(from), type: MessageType.IMAGE_GROUP, images, caption };
 }
 
-export function makeAudio({ url, mediaId, duration, from = "me" }) {
-  return { 
-    ...base(from), 
-    type: MessageType.AUDIO, 
-    content: url || null,
-    mediaId,
-    meta: { duration } 
-  };
+export function makeAudio({ url, duration, from = "me" }) {
+  return { ...base(from), type: MessageType.AUDIO, content: url, meta: { duration } };
 }
 
-export function makeVideo({ url, mediaId, width, height, duration, from = "me" }) {
+export function makeVideo({ url, width, height, duration, from = "me" }) {
   return {
     ...base(from),
     type: MessageType.VIDEO,
-    content: url || null,
-    mediaId,
+    content: url,
     meta: { width, height, duration },
   };
 }
