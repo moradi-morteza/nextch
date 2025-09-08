@@ -14,9 +14,11 @@ import PhotoLibraryRoundedIcon from "@mui/icons-material/PhotoLibraryRounded";
 import ImageRoundedIcon from "@mui/icons-material/ImageRounded";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
 import VoiceRecorder from "./VoiceRecorder.jsx";
 import VideoRecorder from "./VideoRecorder.jsx";
 import AttachBottomSheet from "./AttachBottomSheet.jsx";
+import RecordBottomSheet from "./RecordBottomSheet.jsx";
 
 export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMessage, onSendImage, onSendImages, onSendFile, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
@@ -29,6 +31,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
   const [images, setImages] = useState([]); // multiple [{url,file,width,height}]
   const [caption, setCaption] = useState("");
   const [showAttachSheet, setShowAttachSheet] = useState(false);
+  const [showRecordSheet, setShowRecordSheet] = useState(false);
   const [filePreview, setFilePreview] = useState(null); // for file attachments
   const [isMobile, setIsMobile] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
@@ -144,7 +147,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
         setHasCamera(false);
       }
     };
-    
+
     checkCamera();
   }, []);
 
@@ -396,14 +399,14 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
           <div className={styles.row}>
             {text.trim().length === 0 && (
               <Tooltip title="Attach file">
-                <IconButton 
-                  aria-label="Attach" 
-                  size="medium" 
+                <IconButton
+                  aria-label="Attach"
+                  size="medium"
                   onClick={() => setShowAttachSheet(true)}
-                  sx={{ p: 0.5 }}
+                  sx={{ p: 0.4 }}
                   className="transition-transform duration-200 active:scale-90 hover:scale-110"
                 >
-                  <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
+                  <AttachFileRoundedIcon sx={{ fontSize: 26 }} titleAccess="Attach" />
                 </IconButton>
               </Tooltip>
             )}
@@ -416,7 +419,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
               value={text}
               onChange={(e) => { setText(e.target.value); }}
               onKeyDown={onKeyDown}
-              style={{ 
+              style={{
                 fontSize: '16px', // Prevent zoom on iOS
                 lineHeight: '1.5',
                 minHeight: '24px'
@@ -424,11 +427,11 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
             />
             {text.trim().length > 0 ? (
               <Tooltip title="Send">
-                <IconButton 
-                  aria-label="Send" 
-                  color="primary" 
-                  onClick={handleSend} 
-                  size="medium" 
+                <IconButton
+                  aria-label="Send"
+                  color="primary"
+                  onClick={handleSend}
+                  size="medium"
                   sx={{ p: 0.5 }}
                   className="transition-transform duration-200 active:scale-90 hover:scale-110"
                 >
@@ -436,30 +439,16 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 </IconButton>
               </Tooltip>
             ) : (
-              <>
-                <Tooltip title="Record video">
-                  <IconButton 
-                    aria-label="Record video" 
-                    size="medium" 
-                    sx={{ p: 0.5 }} 
-                    onClick={() => setShowVideoRecorder(true)}
-                    className="transition-transform duration-200 active:scale-90 hover:scale-110"
-                  >
-                    <VideocamRoundedIcon fontSize="medium" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Hold to record">
-                  <IconButton
-                    aria-label="Open recorder"
-                    onClick={() => setShowRecorder(true)}
-                    size="medium"
-                    sx={{ p: 0.5 }}
-                    className="transition-transform duration-200 active:scale-90 hover:scale-110"
-                  >
-                    <MicNoneRoundedIcon sx={{ fontSize: 26 }} titleAccess="Mic" />
-                  </IconButton>
-                </Tooltip>
-              </>
+              <Tooltip title="Record voice or video">
+                <IconButton
+                  aria-label="Record"
+                  onClick={() => setShowRecordSheet(true)}
+                  size="medium"
+                  sx={{ p: 0.5 }}
+                  className="transition-transform duration-200 active:scale-90 hover:scale-110">
+                  <RecordVoiceOverOutlinedIcon sx={{ fontSize: 26 }} />
+                </IconButton>
+              </Tooltip>
             )}
           </div>
         )}
@@ -492,6 +481,12 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
         onPickFile={onPickFile}
         isMobile={isMobile}
         hasCamera={hasCamera}
+      />
+      <RecordBottomSheet
+        open={showRecordSheet}
+        onClose={() => setShowRecordSheet(false)}
+        onVoiceRecord={() => setShowRecorder(true)}
+        onVideoRecord={() => setShowVideoRecorder(true)}
       />
     </div>
   );
