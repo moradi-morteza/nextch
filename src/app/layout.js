@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional"
         />
+        <link rel="stylesheet" href="/webfonts/fontiran.css" />
         <title>NextChat</title>
         <meta name="description" content="AI Chat Application" />
       </head>
