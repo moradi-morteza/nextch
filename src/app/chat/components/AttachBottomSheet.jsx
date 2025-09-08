@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Drawer, Box, Typography } from "@mui/material";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 import PhotoLibraryRoundedIcon from "@mui/icons-material/PhotoLibraryRounded";
@@ -59,6 +60,30 @@ export default function AttachBottomSheet({
     
     input.click();
   };
+
+  // Handle back button to close bottom sheet
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePopState = (event) => {
+      event.preventDefault();
+      onClose();
+    };
+
+    // Push a new state when bottom sheet opens
+    window.history.pushState({ bottomSheet: true }, '');
+    
+    // Listen for back button
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // Clean up: go back if we added a state and sheet is still open
+      if (window.history.state?.bottomSheet) {
+        window.history.back();
+      }
+    };
+  }, [open, onClose]);
 
   return (
     <Drawer
