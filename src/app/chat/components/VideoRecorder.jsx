@@ -26,7 +26,7 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
     chunksRef.current = [];
 
     if (!window.isSecureContext) {
-      setErrMsg("Camera works over HTTPS or localhost only. Use https or open on localhost.");
+      setErrMsg("دوربین فقط در HTTPS یا localhost کار می‌کند. لطفاً از https استفاده کنید یا از localhost باز کنید.");
     } else {
       setErrMsg("");
     }
@@ -45,7 +45,7 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
         setGranted(true);
       } catch (e) {
         console.error(e);
-        setErrMsg("Camera/microphone permission denied. Please allow access in browser/site settings.");
+        setErrMsg("دسترسی به دوربین/میکروفون رد شد. لطفاً در تنظیمات مرورگر اجازه دهید.");
         setGranted(false);
       }
     })();
@@ -103,7 +103,7 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
       startTimer();
     } catch (e) {
       console.error(e);
-      alert("Unable to start recording. Check camera/mic permissions.");
+      alert("قادر به شروع ضبط نیست. دسترسی به دوربین/میکروفون را بررسی کنید.");
       onClose?.();
     }
   };
@@ -203,35 +203,115 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
-      <div className="w-[min(560px,94vw)] p-4 text-white">
-        <div className="flex items-center justify-center gap-3 mb-3">
-          <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-white/50'}`} style={{ width: 12, height: 12 }} />
-          <span className="font-mono text-lg">{mm}:{ss}</span>
+      <div className="w-[min(560px,94vw)] p-4 text-white relative">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className={`relative ${recording ? 'recording-pulse' : ''}`}>
+            <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-white/50'}`} style={{ width: 16, height: 16 }} />
+            {recording && (
+              <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></span>
+            )}
+          </div>
+          <span className={`font-mono text-xl transition-all duration-300 ${recording ? 'text-red-400 scale-110' : 'text-white'}`}>{mm}:{ss}</span>
         </div>
-        <div className="text-sm text-white/80 mb-2 text-center">Video recorder</div>
-        {errMsg && <div className="mx-auto mb-3 max-w-md text-[12px] text-red-300 text-center">{errMsg}</div>}
+        
+        <div className="text-base text-white/90 mb-3 text-center font-medium">ضبط ویدیو</div>
+        {errMsg && <div className="mx-auto mb-4 max-w-md text-[13px] text-red-300 text-center bg-red-500/10 p-2 rounded-lg">{errMsg}</div>}
 
-        {/* Preview frame: square-ish/portrait rectangle with cover fit */}
-        <div className="mx-auto mb-3 w-full max-w-md rounded-xl overflow-hidden bg-black/60 ring-1 ring-white/10" style={{ aspectRatio: '3 / 4' }}>
-          <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+        {/* Preview frame with recording effects */}
+        <div className={`mx-auto mb-4 w-full max-w-md rounded-xl overflow-hidden bg-black/60 ring-1 transition-all duration-300 ${
+          recording 
+            ? 'ring-red-500 ring-2 shadow-lg shadow-red-500/30' 
+            : 'ring-white/10'
+        }`} style={{ aspectRatio: '3 / 4' }}>
+          <div className="relative w-full h-full">
+            <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+            
+            {/* Recording overlay effects */}
+            {recording && (
+              <>
+                {/* Corner recording indicators */}
+                <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 px-2 py-1 rounded-full">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-white font-medium">REC</span>
+                </div>
+                
+                {/* Subtle vignette when recording */}
+                <div className="absolute inset-0 pointer-events-none bg-gradient-radial from-transparent via-transparent to-red-900/10"></div>
+              </>
+            )}
+            
+            {paused && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="text-white text-2xl font-bold bg-black/60 px-4 py-2 rounded-lg">
+                  متوقف شد
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-center gap-3">
           {!recording ? (
-            <button onClick={start} className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">{granted ? 'Start' : 'Allow & Start'}</button>
+            <button 
+              onClick={start} 
+              className="px-6 py-3 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium"
+            >
+              {granted ? 'شروع ضبط' : 'اجازه و شروع'}
+            </button>
           ) : (
             <>
-              <button onClick={pause} className="px-4 py-2 rounded bg-white/10 text-white hover:bg-white/20">{paused ? 'Resume' : 'Pause'}</button>
-              <button onClick={stopAndSubmit} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500">Submit</button>
+              <button 
+                onClick={pause} 
+                className={`px-4 py-2 rounded-full transition-all duration-200 font-medium ${
+                  paused 
+                    ? 'bg-green-500 hover:bg-green-600 text-white' 
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                }`}
+              >
+                {paused ? 'ادامه' : 'توقف'}
+              </button>
+              <button 
+                onClick={stopAndSubmit} 
+                className="px-6 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition-all duration-200 font-medium shadow-lg"
+              >
+                ارسال
+              </button>
             </>
           )}
-          <button onClick={cancel} className="px-4 py-2 rounded bg-white/10 text-white hover:bg-white/20">Cancel</button>
+          <button 
+            onClick={cancel} 
+            className="px-4 py-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-200 font-medium"
+          >
+            لغو
+          </button>
         </div>
       </div>
 
       <style jsx>{`
         .fade-dot { animation: fadeInOut 1.8s ease-in-out infinite; }
-        @keyframes fadeInOut { 0%, 100% { opacity: 0.10; } 50% { opacity: 1; } }
+        @keyframes fadeInOut { 
+          0%, 100% { opacity: 0.3; } 
+          50% { opacity: 1; } 
+        }
+        
+        .recording-pulse {
+          animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { 
+            transform: scale(1);
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+          }
+          50% { 
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.8));
+          }
+        }
+        
+        .bg-gradient-radial {
+          background: radial-gradient(circle at center, var(--tw-gradient-stops));
+        }
       `}</style>
     </div>
   );

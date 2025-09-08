@@ -26,7 +26,7 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
 
     // Inform if context is insecure (e.g., http over LAN)
     if (!window.isSecureContext) {
-      setErrMsg("Microphone works over HTTPS or localhost only. Use https or open on this device via localhost.");
+      setErrMsg("میکروفون فقط در HTTPS یا localhost کار می‌کند. لطفاً از https استفاده کنید یا از localhost باز کنید.");
     } else {
       setErrMsg("");
     }
@@ -39,7 +39,7 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
         setGranted(true);
       } catch (e) {
         setGranted(false);
-        setErrMsg("Microphone permission denied. Please allow access in the browser/site settings.");
+        setErrMsg("دسترسی به میکروفون رد شد. لطفاً در تنظیمات مرورگر اجازه دهید.");
       }
     })();
   }, [open]);
@@ -75,7 +75,7 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
       setRecording(true);
       setPaused(false);
     } catch (e) {
-      alert("Microphone access is required. If on phone via Wi‑Fi, use HTTPS or a dev tunnel.");
+      alert("دسترسی به میکروفون لازم است. اگر از طریق Wi-Fi استفاده می‌کنید، از HTTPS استفاده کنید.");
       console.error(e);
       onClose?.();
     }
@@ -164,35 +164,165 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
-      <div className="w-[min(520px,92vw)] p-4 text-center text-white">
-        <div className="flex items-center justify-center gap-3 mb-3">
-          <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-white/50'} `} style={{ width: 12, height: 12 }} />
-          <span className="font-mono text-lg">{mm}:{ss}</span>
+      <div className="w-[min(520px,92vw)] p-4 text-center text-white relative">
+        {/* Recording ripple effect */}
+        {recording && (
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="recording-ripple"></div>
+            <div className="recording-ripple delay-1"></div>
+            <div className="recording-ripple delay-2"></div>
+          </div>
+        )}
+        
+        <div className="flex items-center justify-center gap-3 mb-4 relative z-10">
+          <div className={`relative ${recording && !paused ? 'recording-pulse' : ''}`}>
+            <span className={`inline-block rounded-full transition-all duration-300 ${
+              recording && !paused 
+                ? 'bg-red-500 fade-dot' 
+                : recording && paused 
+                ? 'bg-yellow-500' 
+                : 'bg-white/50'
+            }`} style={{ width: 16, height: 16 }} />
+            {recording && !paused && (
+              <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></span>
+            )}
+          </div>
+          <span className={`font-mono text-xl transition-all duration-300 ${
+            recording && !paused 
+              ? 'text-red-400 scale-110' 
+              : recording && paused 
+              ? 'text-yellow-400 scale-105' 
+              : 'text-white'
+          }`}>{mm}:{ss}</span>
         </div>
-        <div className="text-sm text-white/80 mb-2">Voice recorder</div>
+        
+        <div className="text-base text-white/90 mb-3 font-medium">ضبط صوت</div>
         {errMsg && (
-          <div className="mx-auto mb-3 max-w-md text-[12px] text-red-300">{errMsg}</div>
+          <div className="mx-auto mb-4 max-w-md text-[13px] text-red-300 bg-red-500/10 p-2 rounded-lg">{errMsg}</div>
         )}
 
-        <div className="flex items-center justify-center gap-3">
+        {/* Waveform visualization when recording or paused indicator */}
+        {recording && !paused && (
+          <div className="flex items-center justify-center gap-1 mb-4 h-8">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="w-1 bg-red-400 rounded-full waveform-bar"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              ></div>
+            ))}
+          </div>
+        )}
+        
+        {/* Paused indicator */}
+        {recording && paused && (
+          <div className="flex items-center justify-center mb-4 h-8">
+            <div className="bg-yellow-500/20 px-4 py-2 rounded-full border border-yellow-500/30">
+              <span className="text-yellow-400 font-medium">متوقف شد</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center gap-3 relative z-10">
           {!recording ? (
-            <button onClick={requestAndStart} className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">{granted ? 'Start' : 'Allow & Start'}</button>
+            <button 
+              onClick={requestAndStart} 
+              className="px-6 py-3 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium"
+            >
+              {granted ? 'شروع ضبط' : 'اجازه و شروع'}
+            </button>
           ) : (
             <>
-              <button onClick={pause} className="px-4 py-2 rounded bg-white/10 text-white hover:bg-white/20">
-                {paused ? 'Resume' : 'Pause'}
+              <button 
+                onClick={pause} 
+                className={`px-4 py-2 rounded-full transition-all duration-200 font-medium ${
+                  paused 
+                    ? 'bg-green-500 hover:bg-green-600 text-white' 
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                }`}
+              >
+                {paused ? 'ادامه' : 'توقف'}
               </button>
-              <button onClick={stopAndSubmit} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500">Submit</button>
+              <button 
+                onClick={stopAndSubmit} 
+                className="px-6 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition-all duration-200 font-medium shadow-lg"
+              >
+                ارسال
+              </button>
             </>
           )}
-          <button onClick={cancel} className="px-4 py-2 rounded bg-white/10 text-white hover:bg-white/20">Cancel</button>
+          <button 
+            onClick={cancel} 
+            className="px-4 py-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-200 font-medium"
+          >
+            لغو
+          </button>
         </div>
       </div>
-      <style jsx>{` // fade in fade out record animation
+      
+      <style jsx>{`
         .fade-dot { animation: fadeInOut 1.8s ease-in-out infinite; }
         @keyframes fadeInOut {
-          0%, 100% { opacity: 0.10; }
+          0%, 100% { opacity: 0.3; }
           50% { opacity: 1; }
+        }
+        
+        .recording-ripple {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 100px;
+          height: 100px;
+          border: 2px solid rgba(239, 68, 68, 0.3);
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+          animation: ripple 2s infinite;
+        }
+        
+        .recording-ripple.delay-1 {
+          animation-delay: 0.7s;
+        }
+        
+        .recording-ripple.delay-2 {
+          animation-delay: 1.4s;
+        }
+        
+        @keyframes ripple {
+          0% {
+            width: 100px;
+            height: 100px;
+            opacity: 0.8;
+          }
+          100% {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+          }
+        }
+        
+        .waveform-bar {
+          height: 4px;
+          animation: waveform 1.2s ease-in-out infinite;
+        }
+        
+        @keyframes waveform {
+          0%, 100% { height: 4px; }
+          50% { height: 24px; }
+        }
+        
+        .recording-pulse {
+          animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { 
+            transform: scale(1);
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+          }
+          50% { 
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.8));
+          }
         }
       `}</style>
     </div>
