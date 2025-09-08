@@ -22,6 +22,7 @@ export default function ChatScreen() {
   ]);
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [selectionMode, setSelectionMode] = useState(false);
+  const [newMessageIds, setNewMessageIds] = useState(new Set());
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -30,17 +31,21 @@ export default function ChatScreen() {
   }, [messages]);
 
   const handleSend = (value) => {
+    const newMessageId = Date.now();
     setMessages((m) => [
       ...m,
-      { id: Date.now(), type: "text", content: value, from: "me", ts: Date.now() },
+      { id: newMessageId, type: "text", content: value, from: "me", ts: newMessageId },
     ]);
+    setNewMessageIds(prev => new Set([...prev, newMessageId]));
   };
 
   const handleVoice = ({ url, blob, duration }) => {
+    const newMessageId = Date.now();
     setMessages((m) => [
       ...m,
-      { id: Date.now(), type: "audio", content: url, blob, from: "me", ts: Date.now(), duration },
+      { id: newMessageId, type: "audio", content: url, blob, from: "me", ts: newMessageId, duration },
     ]);
+    setNewMessageIds(prev => new Set([...prev, newMessageId]));
   };
 
   const handleMessageSelect = (messageId) => {
@@ -111,13 +116,15 @@ export default function ChatScreen() {
         <ChatBackground scrollRef={listRef}>
           <div className="max-w-3xl mx-auto w-full">
             <ul className="space-y-1.5">
-              {messages.map((m) => (
+              {messages.map((m, index) => (
                 <MessageItem 
                   key={m.id} 
                   message={m} 
                   selectionMode={selectionMode}
                   isSelected={selectedMessages.includes(m.id)}
                   onSelect={() => handleMessageSelect(m.id)}
+                  isNewMessage={newMessageIds.has(m.id)}
+                  messageIndex={index}
                 />
               ))}
             </ul>
@@ -125,29 +132,47 @@ export default function ChatScreen() {
         </ChatBackground>
 
         <ChatComposer
-          onSendMessage={(text) =>
-            setMessages((m) => [...m, makeText({ text })])
-          }
-          onVoiceMessage={({ mediaId, duration, url }) =>
-            setMessages((m) => [...m, makeAudio({ mediaId, duration, url })])
-          }
-          onVideoMessage={({ mediaId, duration, width, height, url }) =>
-            setMessages((m) => [...m, makeVideo({ mediaId, duration, width, height, url })])
-          }
-          onSendImage={({ url, caption, width, height }) =>
-            setMessages((m) => [...m, makeImage({ image: { url, width, height }, caption })])
-          }
-          onSendImages={({ items, caption }) =>
-            setMessages((m) => [
-              ...m,
-              items.length <= 1
+          onSendMessage={(text) => {
+            const newMessageId = Date.now();
+            const newMessage = { ...makeText({ text }), id: newMessageId };
+            setMessages((m) => [...m, newMessage]);
+            setNewMessageIds(prev => new Set([...prev, newMessageId]));
+          }}
+          onVoiceMessage={({ mediaId, duration, url }) => {
+            const newMessageId = Date.now();
+            const newMessage = { ...makeAudio({ mediaId, duration, url }), id: newMessageId };
+            setMessages((m) => [...m, newMessage]);
+            setNewMessageIds(prev => new Set([...prev, newMessageId]));
+          }}
+          onVideoMessage={({ mediaId, duration, width, height, url }) => {
+            const newMessageId = Date.now();
+            const newMessage = { ...makeVideo({ mediaId, duration, width, height, url }), id: newMessageId };
+            setMessages((m) => [...m, newMessage]);
+            setNewMessageIds(prev => new Set([...prev, newMessageId]));
+          }}
+          onSendImage={({ url, caption, width, height }) => {
+            const newMessageId = Date.now();
+            const newMessage = { ...makeImage({ image: { url, width, height }, caption }), id: newMessageId };
+            setMessages((m) => [...m, newMessage]);
+            setNewMessageIds(prev => new Set([...prev, newMessageId]));
+          }}
+          onSendImages={({ items, caption }) => {
+            const newMessageId = Date.now();
+            const newMessage = {
+              ...(items.length <= 1
                 ? makeImage({ image: items[0], caption })
-                : makeImageGroup({ images: items, caption }),
-            ])
-          }
-          onSendFile={({ file, name, size, type, caption }) =>
-            setMessages((m) => [...m, makeFile({ file, name, size, type, caption })])
-          }
+                : makeImageGroup({ images: items, caption })),
+              id: newMessageId
+            };
+            setMessages((m) => [...m, newMessage]);
+            setNewMessageIds(prev => new Set([...prev, newMessageId]));
+          }}
+          onSendFile={({ file, name, size, type, caption }) => {
+            const newMessageId = Date.now();
+            const newMessage = { ...makeFile({ file, name, size, type, caption }), id: newMessageId };
+            setMessages((m) => [...m, newMessage]);
+            setNewMessageIds(prev => new Set([...prev, newMessageId]));
+          }}
           maxUploadMB={MAX_UPLOAD_MB}
           showCommands={false}
         />

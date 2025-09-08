@@ -363,27 +363,6 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
           </div>
         ) : (
           <div className={styles.row}>
-            <Tooltip title="Record video">
-              <IconButton 
-                aria-label="Record video" 
-                size="medium" 
-                sx={{ p: 0.5 }} 
-                onClick={() => setShowVideoRecorder(true)}
-                className="transition-transform duration-200 active:scale-90 hover:scale-110"
-              >
-                <VideocamRoundedIcon fontSize="medium" />
-              </IconButton>
-            </Tooltip>
-            <textarea
-              ref={textAreaRef}
-              dir="rtl"
-              rows={1}
-              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2 resize-none leading-6 self-center"
-              placeholder="اینجا بنویسید ..."
-              value={text}
-              onChange={(e) => { setText(e.target.value); }}
-              onKeyDown={onKeyDown}
-            />
             {text.trim().length === 0 && (
               <div className="relative" ref={attachMenuRef}>
                 <Tooltip title="Attach file">
@@ -434,6 +413,16 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 )}
               </div>
             )}
+            <textarea
+              ref={textAreaRef}
+              dir="rtl"
+              rows={1}
+              className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2 resize-none leading-6 self-center"
+              placeholder="اینجا بنویسید ..."
+              value={text}
+              onChange={(e) => { setText(e.target.value); }}
+              onKeyDown={onKeyDown}
+            />
             {text.trim().length > 0 ? (
               <Tooltip title="Send">
                 <IconButton 
@@ -448,17 +437,30 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 </IconButton>
               </Tooltip>
             ) : (
-              <Tooltip title="Hold to record">
-                <IconButton
-                  aria-label="Open recorder"
-                  onClick={() => setShowRecorder(true)}
-                  size="medium"
-                  sx={{ p: 0.5 }}
-                  className="transition-transform duration-200 active:scale-90 hover:scale-110"
-                >
-                  <MicNoneRoundedIcon sx={{ fontSize: 26 }} titleAccess="Mic" />
-                </IconButton>
-              </Tooltip>
+              <>
+                <Tooltip title="Record video">
+                  <IconButton 
+                    aria-label="Record video" 
+                    size="medium" 
+                    sx={{ p: 0.5 }} 
+                    onClick={() => setShowVideoRecorder(true)}
+                    className="transition-transform duration-200 active:scale-90 hover:scale-110"
+                  >
+                    <VideocamRoundedIcon fontSize="medium" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Hold to record">
+                  <IconButton
+                    aria-label="Open recorder"
+                    onClick={() => setShowRecorder(true)}
+                    size="medium"
+                    sx={{ p: 0.5 }}
+                    className="transition-transform duration-200 active:scale-90 hover:scale-110"
+                  >
+                    <MicNoneRoundedIcon sx={{ fontSize: 26 }} titleAccess="Mic" />
+                  </IconButton>
+                </Tooltip>
+              </>
             )}
           </div>
         )}

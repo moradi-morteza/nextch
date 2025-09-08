@@ -11,7 +11,7 @@ export default function ChatBackground({
     return (
         <section
             ref={scrollRef}
-            className={styles.container}
+            className={`${styles.container} animate-pattern-fade`}
             style={{
                 backgroundImage: [
                     `radial-gradient(900px 600px at 0% 0%, var(--tg-grad-1) 0%, transparent 90%)`,

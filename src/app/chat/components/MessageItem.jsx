@@ -9,7 +9,7 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 const AudioMessage = dynamic(() => import("./AudioMessage.jsx"), { ssr: false });
 const VideoMessage = dynamic(() => import("./VideoMessage.jsx"), { ssr: false });
 
-export default function MessageItem({ message, selectionMode = false, isSelected = false, onSelect }) {
+export default function MessageItem({ message, selectionMode = false, isSelected = false, onSelect, isNewMessage = false, messageIndex = 0 }) {
   const isMe = message.from === "me";
   const isSystem = message.type === 'system' || message.from === 'system';
   const [showSlider, setShowSlider] = useState(false);
@@ -94,7 +94,10 @@ export default function MessageItem({ message, selectionMode = false, isSelected
   };
 
   return (
-    <li className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"}`}>
+    <li 
+      className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"} ${isNewMessage ? 'animate-slide-in' : 'animate-fade-in'}`}
+      style={{ animationDelay: isNewMessage ? '0ms' : `${messageIndex * 100}ms` }}
+    >
       {selectionMode && canSelect && (
         <div className="mr-2">
           <div 
