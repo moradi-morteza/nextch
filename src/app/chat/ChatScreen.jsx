@@ -109,17 +109,19 @@ export default function ChatScreen() {
         )}
 
         <ChatBackground scrollRef={listRef}>
-          <ul className="space-y-1.5">
-            {messages.map((m) => (
-              <MessageItem 
-                key={m.id} 
-                message={m} 
-                selectionMode={selectionMode}
-                isSelected={selectedMessages.includes(m.id)}
-                onSelect={() => handleMessageSelect(m.id)}
-              />
-            ))}
-          </ul>
+          <div className="max-w-3xl mx-auto w-full">
+            <ul className="space-y-1.5">
+              {messages.map((m) => (
+                <MessageItem 
+                  key={m.id} 
+                  message={m} 
+                  selectionMode={selectionMode}
+                  isSelected={selectedMessages.includes(m.id)}
+                  onSelect={() => handleMessageSelect(m.id)}
+                />
+              ))}
+            </ul>
+          </div>
         </ChatBackground>
 
         <ChatComposer
