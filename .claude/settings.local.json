@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Read(//mnt/c/Users/morteza/Desktop/askif/**)"
+      "Read(//mnt/c/Users/morteza/Desktop/askif/**)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

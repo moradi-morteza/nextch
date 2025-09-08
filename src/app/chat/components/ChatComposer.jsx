@@ -16,6 +16,7 @@ import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRound
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import VoiceRecorder from "./VoiceRecorder.jsx";
 import VideoRecorder from "./VideoRecorder.jsx";
+import AttachBottomSheet from "./AttachBottomSheet.jsx";
 
 export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMessage, onSendImage, onSendImages, onSendFile, maxUploadMB = 5, showCommands = false }) {
   const [text, setText] = useState("");
@@ -27,7 +28,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
   const [imagePreview, setImagePreview] = useState(null); // single
   const [images, setImages] = useState([]); // multiple [{url,file,width,height}]
   const [caption, setCaption] = useState("");
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showAttachSheet, setShowAttachSheet] = useState(false);
   const [filePreview, setFilePreview] = useState(null); // for file attachments
   const [isMobile, setIsMobile] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
@@ -35,7 +36,6 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
   const chunksRef = useRef([]);
   const pointerStartX = useRef(0);
   const recordTimerRef = useRef(null);
-  const attachMenuRef = useRef(null);
 
   const playSendSound = () => {
     try {
@@ -148,18 +148,6 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
     checkCamera();
   }, []);
 
-  // Close attach menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (attachMenuRef.current && !attachMenuRef.current.contains(event.target)) {
-        setShowAttachMenu(false);
-      }
-    };
-    if (showAttachMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAttachMenu]);
 
   // Handle keyboard visibility on mobile
   useEffect(() => {
@@ -218,7 +206,6 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
     const metas = await Promise.all(valids.map((f) => new Promise((res)=>{ const url = URL.createObjectURL(f); const i=new Image(); i.onload=()=>res({url,file:f,width:i.width,height:i.height}); i.src=url; })));
     if (metas.length === 1) { setImagePreview(metas[0]); setImages([]); }
     else { setImages(metas); setImagePreview(null); }
-    setShowAttachMenu(false);
   };
 
   const onPickFile = (evt) => {
@@ -231,7 +218,6 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
       return;
     }
     setFilePreview({ file, name: file.name, size: file.size, type: file.type });
-    setShowAttachMenu(false);
   };
 
   const onCameraCapture = async (evt) => {
@@ -250,7 +236,6 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
       setImages([]);
     };
     img.src = url;
-    setShowAttachMenu(false);
   };
 
   const cancelImage = () => {
@@ -410,54 +395,17 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
         ) : (
           <div className={styles.row}>
             {text.trim().length === 0 && (
-              <div className="relative" ref={attachMenuRef}>
-                <Tooltip title="Attach file">
-                  <IconButton 
-                    aria-label="Attach" 
-                    size="medium" 
-                    onClick={() => setShowAttachMenu(!showAttachMenu)}
-                    sx={{ p: 0.5 }}
-                    className="transition-transform duration-200 active:scale-90 hover:scale-110"
-                  >
-                    <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
-                  </IconButton>
-                </Tooltip>
-                {showAttachMenu && (
-                  <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-lg border p-1 min-w-[160px]">
-                    {/* Camera option - only show on mobile with camera */}
-                    {isMobile && hasCamera && (
-                      <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
-                        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onCameraCapture} />
-                        <PhotoCameraRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
-                        <span className="text-sm text-gray-700">دوربین</span>
-                      </label>
-                    )}
-                    
-                    {/* Images option - different labels for mobile vs desktop */}
-                    <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
-                      <input type="file" accept="image/*" multiple className="hidden" onChange={onPickImages} />
-                      {isMobile ? (
-                        <>
-                          <PhotoLibraryRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
-                          <span className="text-sm text-gray-700">گالری</span>
-                        </>
-                      ) : (
-                        <>
-                          <ImageRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
-                          <span className="text-sm text-gray-700">تصاویر</span>
-                        </>
-                      )}
-                    </label>
-                    
-                    {/* File option - always available */}
-                    <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
-                      <input type="file" className="hidden" onChange={onPickFile} />
-                      <InsertDriveFileRoundedIcon sx={{ fontSize: 20, color: '#666' }} />
-                      <span className="text-sm text-gray-700">فایل</span>
-                    </label>
-                  </div>
-                )}
-              </div>
+              <Tooltip title="Attach file">
+                <IconButton 
+                  aria-label="Attach" 
+                  size="medium" 
+                  onClick={() => setShowAttachSheet(true)}
+                  sx={{ p: 0.5 }}
+                  className="transition-transform duration-200 active:scale-90 hover:scale-110"
+                >
+                  <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
+                </IconButton>
+              </Tooltip>
             )}
             <textarea
               ref={textAreaRef}
@@ -536,6 +484,15 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
           }}
         />
       )}
+      <AttachBottomSheet
+        open={showAttachSheet}
+        onClose={() => setShowAttachSheet(false)}
+        onCameraCapture={onCameraCapture}
+        onPickImages={onPickImages}
+        onPickFile={onPickFile}
+        isMobile={isMobile}
+        hasCamera={hasCamera}
+      />
     </div>
   );
 }
