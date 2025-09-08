@@ -149,10 +149,10 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
           </div>
           <button
             disabled
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-400 transition-colors"
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-400 transition-colors"
             aria-label="Loading"
           >
-            <PlayArrowRoundedIcon sx={{ fontSize: 28, color: 'white' }} />
+            <PlayArrowRoundedIcon sx={{ fontSize: 32, color: 'white' }} />
           </button>
         </div>
         <div className="flex justify-between items-center text-[11px] text-gray-500">
@@ -174,13 +174,13 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
         <button
           onClick={toggle}
           disabled={!ready}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-400 transition-colors"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-400 transition-colors"
           aria-label={playing ? "Pause" : "Play"}
         >
           {playing ? (
-            <PauseRoundedIcon sx={{ fontSize: 25, color: 'white' }} />
+            <PauseRoundedIcon sx={{ fontSize: 30, color: 'white' }} />
           ) : (
-            <PlayArrowRoundedIcon sx={{ fontSize: 28, color: 'white' }} />
+            <PlayArrowRoundedIcon sx={{ fontSize: 32, color: 'white' }} />
           )}
         </button>
       </div>
