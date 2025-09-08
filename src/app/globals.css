@@ -86,13 +86,11 @@ body {
 /* Top/bottom bars helpers */
 .tg-topbar {
   background: #fff;
-  border-bottom: 1px solid rgb(var(--tg-bar-line-rgb) / var(--tg-topbar-line-alpha));
-  box-shadow: var(--tg-topbar-shadow);
+  border-bottom: 1px solid #e5e7eb;
 }
 .tg-bottombar {
   background: #fff;
-  border-top: 1px solid rgb(var(--tg-bar-line-rgb) / var(--tg-bottombar-line-alpha));
-  box-shadow: var(--tg-bottombar-shadow);
+  border-top: 1px solid #e5e7eb;
 }
 
 /* Chat bubbles */
