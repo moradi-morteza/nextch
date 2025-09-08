@@ -364,7 +364,13 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
         ) : (
           <div className={styles.row}>
             <Tooltip title="Record video">
-              <IconButton aria-label="Record video" size="medium" sx={{ p: 0.5 }} onClick={() => setShowVideoRecorder(true)}>
+              <IconButton 
+                aria-label="Record video" 
+                size="medium" 
+                sx={{ p: 0.5 }} 
+                onClick={() => setShowVideoRecorder(true)}
+                className="transition-transform duration-200 active:scale-90 hover:scale-110"
+              >
                 <VideocamRoundedIcon fontSize="medium" />
               </IconButton>
             </Tooltip>
@@ -386,6 +392,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                     size="medium" 
                     onClick={() => setShowAttachMenu(!showAttachMenu)}
                     sx={{ p: 0.5 }}
+                    className="transition-transform duration-200 active:scale-90 hover:scale-110"
                   >
                     <AttachFileRoundedIcon sx={{ fontSize: 24 }} titleAccess="Attach" />
                   </IconButton>
@@ -429,7 +436,14 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
             )}
             {text.trim().length > 0 ? (
               <Tooltip title="Send">
-                <IconButton aria-label="Send" color="primary" onClick={handleSend} size="medium" sx={{ p: 0.5 }}>
+                <IconButton 
+                  aria-label="Send" 
+                  color="primary" 
+                  onClick={handleSend} 
+                  size="medium" 
+                  sx={{ p: 0.5 }}
+                  className="transition-transform duration-200 active:scale-90 hover:scale-110"
+                >
                   <SendRoundedIcon />
                 </IconButton>
               </Tooltip>
@@ -440,6 +454,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                   onClick={() => setShowRecorder(true)}
                   size="medium"
                   sx={{ p: 0.5 }}
+                  className="transition-transform duration-200 active:scale-90 hover:scale-110"
                 >
                   <MicNoneRoundedIcon sx={{ fontSize: 26 }} titleAccess="Mic" />
                 </IconButton>
