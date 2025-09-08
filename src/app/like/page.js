@@ -69,7 +69,7 @@ export default function Like() {
                 sx={{ fontSize: 96 }} 
               />
               <h3 className="text-lg font-medium text-gray-600 mb-2">No activity yet</h3>
-              <p className="text-gray-400">When someone interacts with your chats, you'll see it here</p>
+              <p className="text-gray-400">When someone interacts with your chats, you&apos;ll see it here</p>
             </div>
           )}
         </div>
