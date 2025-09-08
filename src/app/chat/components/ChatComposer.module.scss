@@ -1,6 +1,8 @@
 .root {
   width: 100%;
+  position: relative;
 }
+
 .row {
   /* Let composer grow with textarea; keep a comfortable minimum */
   min-height: 3.5rem; /* ~h-14 */
@@ -12,4 +14,26 @@
 
 .iconTight {
   padding: 6px; /* reduce default MUI IconButton padding */
+}
+
+/* Mobile keyboard fixes */
+@media screen and (max-width: 768px) {
+  .root {
+    /* Ensure composer stays at bottom */
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 100;
+    
+    /* Prevent white space under input */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Prevent body scroll when typing */
+  body:has(.root textarea:focus) {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
 }

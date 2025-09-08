@@ -161,6 +161,52 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
     }
   }, [showAttachMenu]);
 
+  // Handle keyboard visibility on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleFocus = () => {
+      setTimeout(() => {
+        document.body.classList.add('keyboard-open');
+        // Scroll to bottom when keyboard opens
+        window.scrollTo(0, document.body.scrollHeight);
+      }, 100);
+    };
+
+    const handleBlur = () => {
+      setTimeout(() => {
+        document.body.classList.remove('keyboard-open');
+      }, 100);
+    };
+
+    const handleResize = () => {
+      // Detect keyboard by viewport height change
+      const isKeyboardOpen = window.innerHeight < window.screen.height * 0.75;
+      if (isKeyboardOpen) {
+        document.body.classList.add('keyboard-open');
+      } else {
+        document.body.classList.remove('keyboard-open');
+      }
+    };
+
+    const textarea = textAreaRef.current;
+    if (textarea) {
+      textarea.addEventListener('focus', handleFocus);
+      textarea.addEventListener('blur', handleBlur);
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      if (textarea) {
+        textarea.removeEventListener('focus', handleFocus);
+        textarea.removeEventListener('blur', handleBlur);
+      }
+      window.removeEventListener('resize', handleResize);
+      document.body.classList.remove('keyboard-open');
+    };
+  }, [isMobile]);
+
   const onPickImages = async (evt) => {
     const files = Array.from(evt.target.files || []);
     evt.target.value = "";
@@ -422,6 +468,11 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
               value={text}
               onChange={(e) => { setText(e.target.value); }}
               onKeyDown={onKeyDown}
+              style={{ 
+                fontSize: '16px', // Prevent zoom on iOS
+                lineHeight: '1.5',
+                minHeight: '24px'
+              }}
             />
             {text.trim().length > 0 ? (
               <Tooltip title="Send">

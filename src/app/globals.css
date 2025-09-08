@@ -143,3 +143,52 @@ body {
 .animate-pattern-fade {
   animation: pattern-fade-in 0.5s ease-in-out forwards;
 }
+
+/* Android keyboard fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari */
+  .h-\[100dvh\] {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+}
+
+/* Android keyboard viewport fix */
+@media screen and (max-width: 768px) {
+  html {
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Prevent viewport resize when keyboard appears */
+  .h-\[100dvh\] {
+    height: 100vh;
+    height: 100svh; /* Small viewport height - excludes keyboard */
+  }
+  
+  /* Fix for input focus zoom on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea {
+    font-size: 16px !important;
+    transform: translateZ(0);
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Prevent body scroll when keyboard is open */
+  body.keyboard-open {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+}
