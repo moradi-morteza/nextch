@@ -128,8 +128,9 @@ export default function AttachBottomSheet({
         {/* Options - Horizontal Layout */}
         <Box sx={{ 
           display: 'flex', 
-          justifyContent: 'space-around',
+          justifyContent: 'center',
           alignItems: 'center',
+          gap: 3,
           px: 3,
           py: 2 
         }}>
