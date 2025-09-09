@@ -15,8 +15,11 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false); // This handles video data loading
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
+  const loadingTimeoutRef = useRef(null);
   const uniqueMediaId = useRef(`video-${Date.now()}-${Math.random()}`).current;
 
   const fmt = (s) => {
@@ -29,17 +32,40 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
   useEffect(() => {
     if (mediaId && !url) {
       setLoading(true);
+      setLoadError(false);
+      
+      // Set timeout for loading
+      loadingTimeoutRef.current = setTimeout(() => {
+        if (loading && !videoLoaded) {
+          setLoadError(true);
+          setLoading(false);
+        }
+      }, 15000); // 15 second timeout
+      
       getMediaUrl(mediaId)
         .then(mediaUrl => {
           setVideoUrl(mediaUrl);
           setLoading(false);
+          if (loadingTimeoutRef.current) {
+            clearTimeout(loadingTimeoutRef.current);
+          }
         })
         .catch(error => {
           console.error('Failed to load video from IndexedDB:', error);
           setLoading(false);
+          setLoadError(true);
+          if (loadingTimeoutRef.current) {
+            clearTimeout(loadingTimeoutRef.current);
+          }
         });
     }
-  }, [mediaId, url]);
+    
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [mediaId, url, retryCount]);
 
   // Constrain video area similar to images; keep aspect, fit to container
   const maxW = 280; // align with IMAGE_MAX_WIDTH_PX
@@ -78,7 +104,32 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
     mediaManager.ended(videoRef.current, uniqueMediaId);
   };
 
-  const handleVideoLoaded = () => setVideoLoaded(true);
+  const handleVideoLoaded = () => {
+    setVideoLoaded(true);
+    setLoading(false);
+    setLoadError(false);
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+  };
+
+  const handleVideoError = () => {
+    setLoadError(true);
+    setLoading(false);
+    setVideoLoaded(false);
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+  };
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    setLoadError(false);
+    setVideoLoaded(false);
+    if (videoRef.current) {
+      videoRef.current.load(); // Force reload the video
+    }
+  };
 
   const toggleFullscreen = async () => {
     if (!containerRef.current) return;
@@ -158,10 +209,12 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
         onEnded={handleVideoEnded}
         onLoadedData={handleVideoLoaded}
         onCanPlay={handleVideoLoaded}
+        onError={handleVideoError}
+        onLoadStart={() => !videoLoaded && setLoading(true)}
       />
 
       {/* Loading state - clean and elegant */}
-      {(loading || !videoLoaded) && (
+      {(loading || !videoLoaded) && !loadError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
           <CircularProgress
             size={40}
@@ -174,6 +227,23 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
           <span className="text-white text-sm mt-2 font-medium bg-black/30 px-2 py-1 rounded" dir="rtl">
             در حال بارگذاری...
           </span>
+        </div>
+      )}
+
+      {/* Error state with retry button */}
+      {loadError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
+          <div className="text-red-400 text-2xl mb-2">⚠</div>
+          <span className="text-white text-sm font-medium bg-black/30 px-2 py-1 rounded mb-3" dir="rtl">
+            خطا در بارگذاری ویدیو
+          </span>
+          <button
+            onClick={handleRetry}
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
+            dir="rtl"
+          >
+            تلاش مجدد {retryCount > 0 && `(${retryCount})`}
+          </button>
         </div>
       )}
 
