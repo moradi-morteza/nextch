@@ -25,6 +25,26 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     
+    // Prevent touch events from reaching background elements
+    const preventTouch = (e) => {
+      // Only prevent if the event target is not within our slider
+      if (!e.target.closest('[data-slider="true"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    };
+    
+    const preventContextMenu = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    const preventSelection = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
     // Keyboard navigation
     const handleKeyDown = (e) => {
       if (e.key === "Escape") handleClose();
@@ -35,11 +55,24 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
     // Android back button
     const handlePopState = () => handleClose();
     
+    // Add event listeners with capture=true to catch events early
+    document.addEventListener("touchstart", preventTouch, { capture: true, passive: false });
+    document.addEventListener("touchmove", preventTouch, { capture: true, passive: false });
+    document.addEventListener("touchend", preventTouch, { capture: true, passive: false });
+    document.addEventListener("contextmenu", preventContextMenu, { capture: true });
+    document.addEventListener("selectstart", preventSelection, { capture: true });
+    document.addEventListener("dragstart", preventSelection, { capture: true });
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("popstate", handlePopState);
     
     return () => {
       document.body.style.overflow = originalOverflow;
+      document.removeEventListener("touchstart", preventTouch, { capture: true });
+      document.removeEventListener("touchmove", preventTouch, { capture: true });
+      document.removeEventListener("touchend", preventTouch, { capture: true });
+      document.removeEventListener("contextmenu", preventContextMenu, { capture: true });
+      document.removeEventListener("selectstart", preventSelection, { capture: true });
+      document.removeEventListener("dragstart", preventSelection, { capture: true });
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("popstate", handlePopState);
     };
@@ -102,6 +135,9 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     isDraggingRef.current = false;
+    
+    // Prevent long press context menu
+    e.preventDefault();
   };
 
   const handleTouchMove = (e) => {
@@ -174,12 +210,17 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
 
   const sliderContent = (
     <div
+      data-slider="true"
       className="fixed inset-0 bg-black text-white flex flex-col z-[9999]"
       style={{
         opacity: isVisible ? 1 : 0,
         transition: "opacity 200ms ease",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitTouchCallout: "none"
       }}
       onClick={handleClose}
+      onContextMenu={(e) => e.preventDefault()}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-gradient-to-b from-black/50 to-transparent">
@@ -200,10 +241,25 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
         ref={containerRef}
         className="flex-1 flex items-center justify-center relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onDoubleClick={(e) => toggleZoom(e)}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          handleTouchStart(e);
+        }}
+        onTouchMove={(e) => {
+          e.stopPropagation();
+          handleTouchMove(e);
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          handleTouchEnd(e);
+        }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          toggleZoom(e);
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerMove={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
       >
         <img
           key={`image-${currentIndex}`}
@@ -211,9 +267,17 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
           alt={imageCaption || `Image ${currentIndex + 1}`}
           className="max-h-full max-w-full object-contain select-none"
           draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
           style={{
             transform: `scale(${scale}) translate(${offset.x / scale}px, ${offset.y / scale}px)`,
             transition: "transform 300ms ease-out",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            MozUserSelect: "none",
+            msUserSelect: "none",
+            WebkitTouchCallout: "none",
+            WebkitUserDrag: "none",
+            KhtmlUserSelect: "none"
           }}
         />
       </div>
@@ -227,7 +291,15 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
 
       {/* Thumbnail Navigation */}
       {imageCount > 1 && (
-        <div className="px-4 pb-6 pt-4 bg-gradient-to-t from-black/60 to-transparent">
+        <div 
+          className="px-4 pb-6 pt-4 bg-gradient-to-t from-black/60 to-transparent"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerMove={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
+        >
           <div 
             ref={thumbnailsRef}
             className="flex gap-2 overflow-x-auto py-2 px-2 scrollbar-hide"
@@ -239,6 +311,9 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
               msOverflowStyle: "none",
               scrollPaddingInline: "20px"
             }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
           >
             {images.map((img, index) => {
               const thumbUrl = img?.url || img;
