@@ -2,6 +2,7 @@
 
 import { useMemo, useEffect, useState, useRef } from "react";
 import { getMediaUrl } from "../../../utils/mediaStorage";
+import mediaManager from "../../../utils/mediaManager";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
@@ -17,6 +18,7 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
   const [videoLoaded, setVideoLoaded] = useState(false); // This handles video data loading
   const videoRef = useRef(null);
   const containerRef = useRef(null);
+  const uniqueMediaId = useRef(`video-${Date.now()}-${Math.random()}`).current;
   
   const fmt = (s) => {
     const mm = String(Math.floor((s || 0) / 60)).padStart(2, "0");
@@ -55,13 +57,28 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
       if (isPlaying) {
         videoRef.current.pause();
       } else {
+        // Use media manager to handle multiple media
+        mediaManager.play(videoRef.current, uniqueMediaId);
         videoRef.current.play();
       }
     }
   };
 
-  const handleVideoPlay = () => setIsPlaying(true);
-  const handleVideoPause = () => setIsPlaying(false);
+  const handleVideoPlay = () => {
+    setIsPlaying(true);
+    mediaManager.play(videoRef.current, uniqueMediaId);
+  };
+  
+  const handleVideoPause = () => {
+    setIsPlaying(false);
+    mediaManager.pause(videoRef.current, uniqueMediaId);
+  };
+  
+  const handleVideoEnded = () => {
+    setIsPlaying(false);
+    mediaManager.ended(videoRef.current, uniqueMediaId);
+  };
+  
   const handleVideoLoaded = () => setVideoLoaded(true);
 
   const toggleFullscreen = async () => {
@@ -89,6 +106,17 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
       console.error('Fullscreen error:', error);
     }
   };
+
+  // Register/unregister with media manager
+  useEffect(() => {
+    if (videoRef.current) {
+      mediaManager.register(videoRef.current, uniqueMediaId);
+    }
+    
+    return () => {
+      mediaManager.unregister(uniqueMediaId);
+    };
+  }, [uniqueMediaId]);
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -127,7 +155,7 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
         style={isFullscreen ? { width: '100%', height: '100%', objectFit: 'contain' } : style}
         onPlay={handleVideoPlay}
         onPause={handleVideoPause}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleVideoEnded}
         onLoadedData={handleVideoLoaded}
       />
       

@@ -6,6 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 import { getMediaUrl } from "../../../utils/mediaStorage";
+import mediaManager from "../../../utils/mediaManager";
 
 export default function AudioMessage({ url, mediaId, duration, variant = 'me', timestamp }) {
   const containerRef = useRef(null);
@@ -16,6 +17,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
   const [audioUrl, setAudioUrl] = useState(url);
   const [loading, setLoading] = useState(!!mediaId && !url);
   const audioUrlRef = useRef(null);
+  const uniqueMediaId = useRef(`audio-${Date.now()}-${Math.random()}`).current;
   
   const colorFor = (v, isPlaying) =>
     v === 'me'
@@ -90,11 +92,28 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
     const onReady = () => {
       setReady(true);
       setPlaying(false);
+      // Register with media manager when ready
+      if (ws.getMediaElement()) {
+        mediaManager.register(ws.getMediaElement(), uniqueMediaId);
+      }
     };
     const onTime = (t) => setCurrent(t);
-    const onFinish = () => setPlaying(false);
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
+    const onFinish = () => {
+      setPlaying(false);
+      mediaManager.ended(ws.getMediaElement(), uniqueMediaId);
+    };
+    const onPlay = () => {
+      setPlaying(true);
+      if (ws.getMediaElement()) {
+        mediaManager.play(ws.getMediaElement(), uniqueMediaId);
+      }
+    };
+    const onPause = () => {
+      setPlaying(false);
+      if (ws.getMediaElement()) {
+        mediaManager.pause(ws.getMediaElement(), uniqueMediaId);
+      }
+    };
     
     ws.on("ready", onReady);
     ws.on("timeupdate", onTime);
@@ -108,6 +127,8 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
       ws.un("finish", onFinish);
       ws.un("play", onPlay);
       ws.un("pause", onPause);
+      // Unregister from media manager
+      mediaManager.unregister(uniqueMediaId);
       ws.destroy();
     };
   }, [audioUrl, variant, loading]);
@@ -125,6 +146,10 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
     if (!ws || !ready) return;
     
     try {
+      if (!playing && ws.getMediaElement()) {
+        // Use media manager to pause other media first
+        mediaManager.play(ws.getMediaElement(), uniqueMediaId);
+      }
       // playPause returns a promise in v7
       await ws.playPause();
       // State is managed by event listeners now
