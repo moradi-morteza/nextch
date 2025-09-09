@@ -1,239 +1,289 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
-  const [index, setIndex] = useState(startIndex);
-  const touchStart = useRef({ x: null, y: null });
-  const touchDX = useRef(0);
-  const touchDY = useRef(0);
-
-  const count = images.length || 0;
-  const wrap = (i) => (count > 0 ? (i % count + count) % count : 0);
-  const go = (deltaOrIndex) =>
-    setIndex((prev) => {
-      if (typeof deltaOrIndex === "number" && Math.abs(deltaOrIndex) > 1) return wrap(deltaOrIndex);
-      return wrap(prev + (typeof deltaOrIndex === "number" ? deltaOrIndex : 0));
-    });
-
-  useEffect(() => {
-    // lock body scroll while open
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose?.();
-      if (e.key === "ArrowLeft") go(-1);
-      if (e.key === "ArrowRight") go(1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
-
-  useEffect(() => {
-    // preload neighbors
-    const preload = (i) => {
-      if (i < 0 || i >= count) return;
-      const img = new Image();
-      img.src = images[i].url || images[i];
-    };
-    preload(index);
-    preload(index + 1);
-    preload(index - 1);
-  }, [index, images, count]);
-
-  const [dragX, setDragX] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  // Zoom & pan
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
+  const [isVisible, setIsVisible] = useState(false);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const panStart = useRef({ x: 0, y: 0 });
-  const offsetStart = useRef({ x: 0, y: 0 });
-  const lastTap = useRef(0);
-  const onTouchStart = (e) => {
-    const t = e.touches[0];
-    touchStart.current = { x: t.clientX, y: t.clientY };
-    touchDX.current = 0;
-    touchDY.current = 0;
-    setDragging(true);
-    if (scale > 1) {
-      // prepare pan on touch devices
-      panStart.current = { x: t.clientX, y: t.clientY };
-      offsetStart.current = { ...offset };
+  
+  const containerRef = useRef(null);
+  const thumbnailsRef = useRef(null);
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const lastTapRef = useRef(0);
+  
+  const imageCount = images.length;
+
+  // Entrance animation
+  useEffect(() => {
+    setTimeout(() => setIsVisible(true), 50);
+    
+    // Lock body scroll
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    
+    // Keyboard navigation
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+      if (e.key === "ArrowLeft") goToPrevious();
+      if (e.key === "ArrowRight") goToNext();
+    };
+    
+    // Android back button
+    const handlePopState = () => handleClose();
+    
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("popstate", handlePopState);
+    
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => onClose?.(), 200);
+  };
+
+  const goToNext = () => {
+    if (imageCount > 1) {
+      const newIndex = (currentIndex + 1) % imageCount;
+      setCurrentIndex(newIndex);
+      resetZoom();
+      scrollToActiveThumbnail(newIndex);
     }
   };
-  const onTouchMove = (e) => {
-    const t = e.touches[0];
-    if (touchStart.current.x == null) return;
-    touchDX.current = t.clientX - touchStart.current.x;
-    touchDY.current = t.clientY - touchStart.current.y;
-    if (scale > 1) {
-      // Pan when zoomed
-      e.preventDefault();
-      const dx = t.clientX - panStart.current.x;
-      const dy = t.clientY - panStart.current.y;
-      const next = clampPan(offsetStart.current.x + dx, offsetStart.current.y + dy);
-      setOffset(next);
-      setDragX(0);
+
+  const goToPrevious = () => {
+    if (imageCount > 1) {
+      const newIndex = (currentIndex - 1 + imageCount) % imageCount;
+      setCurrentIndex(newIndex);
+      resetZoom();
+      scrollToActiveThumbnail(newIndex);
+    }
+  };
+
+  const scrollToActiveThumbnail = (index) => {
+    setTimeout(() => {
+      if (thumbnailsRef.current && imageCount > 3) {
+        const container = thumbnailsRef.current;
+        const activeThumb = container.children[index];
+        if (activeThumb) {
+          activeThumb.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+          });
+        }
+      }
+    }, 50);
+  };
+
+  const goToIndex = (index) => {
+    setCurrentIndex(index);
+    resetZoom();
+    scrollToActiveThumbnail(index);
+  };
+
+  const resetZoom = () => {
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
+  // Touch handling
+  const handleTouchStart = (e) => {
+    if (scale > 1) return; // Don't handle swipes when zoomed
+    
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    isDraggingRef.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (scale > 1) return;
+    
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+    
+    if (deltaX > 10 || deltaY > 10) {
+      isDraggingRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (scale > 1) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    
+    // Double tap to zoom
+    if (!isDraggingRef.current) {
+      const now = Date.now();
+      if (now - lastTapRef.current < 300) {
+        toggleZoom(touch);
+      }
+      lastTapRef.current = now;
+      return;
+    }
+    
+    // Swipe gestures
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if (Math.abs(deltaX) > 50) {
+        if (deltaX > 0) {
+          goToPrevious(); // Swipe right = previous
+        } else {
+          goToNext(); // Swipe left = next
+        }
+      }
     } else {
-      setDragX(touchDX.current);
+      // Vertical swipe to close
+      if (Math.abs(deltaY) > 100) {
+        handleClose();
+      }
     }
-  };
-  const onTouchEnd = (e) => {
-    // Double-tap detection for touch
-    const now = Date.now();
-    const isTap = Math.abs(touchDX.current) < 10 && Math.abs(touchDY.current) < 10;
-    if (isTap && now - lastTap.current < 350) {
-      toggleZoom(e.changedTouches?.[0]);
-    }
-    lastTap.current = now;
-    const dx = touchDX.current;
-    touchStart.current = { x: null, y: null };
-    touchDX.current = 0;
-    touchDY.current = 0;
-    const threshold = 50; // px
-    if (scale === 1) {
-      if (dx > threshold) go(-1);
-      else if (dx < -threshold) go(1);
-    }
-    setDragX(0);
-    setDragging(false);
   };
 
   const toggleZoom = (point) => {
-    setScale((prev) => {
-      if (prev === 1) {
-        // Zoom in to 2.5x, center around tap point if provided
-        const newScale = 2.5;
-        if (point) {
-          const vw = window.innerWidth;
-          const vh = window.innerHeight;
-          const cx = vw / 2;
-          const cy = vh / 2;
-          const dx = (cx - point.clientX) / newScale;
-          const dy = (cy - point.clientY) / newScale;
-          setOffset({ x: dx * newScale, y: dy * newScale });
-        }
-        return newScale;
-      } else {
-        setOffset({ x: 0, y: 0 });
-        return 1;
+    if (scale === 1) {
+      setScale(2.5);
+      // Center around tap point
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect && point) {
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const offsetX = (centerX - (point.clientX - rect.left)) * 1.5;
+        const offsetY = (centerY - (point.clientY - rect.top)) * 1.5;
+        setOffset({ x: offsetX, y: offsetY });
       }
-    });
+    } else {
+      resetZoom();
+    }
   };
 
-  const onDoubleClick = (e) => {
-    e.preventDefault();
-    toggleZoom(e);
-  };
+  const currentImage = images[currentIndex];
+  const imageUrl = currentImage?.url || currentImage;
+  const imageCaption = currentImage?.caption || currentImage?.alt || "";
 
-  const clampPan = (x, y) => {
-    const limit = 1000; // generous clamp to avoid losing image
-    return { x: Math.max(-limit, Math.min(limit, x)), y: Math.max(-limit, Math.min(limit, y)) };
-  };
-
-  const onPointerDown = (e) => {
-    // Only pan when zoomed in
-    if (scale === 1) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    panStart.current = { x: e.clientX, y: e.clientY };
-    offsetStart.current = { ...offset };
-  };
-
-  const onPointerMove = (e) => {
-    if (scale === 1) return;
-    if (e.buttons !== 1) return;
-    const dx = e.clientX - panStart.current.x;
-    const dy = e.clientY - panStart.current.y;
-    const next = clampPan(offsetStart.current.x + dx, offsetStart.current.y + dy);
-    setOffset(next);
-  };
-
-  const current = images[index] || {};
-  const url = current.url || current;
-  const caption = current.caption || current.alt || "";
-
-  return (
+  const sliderContent = (
     <div
-      className="fixed inset-0 z-50 bg-black/90 text-white flex flex-col"
-      onClick={onClose}
-      role="dialog"
-      aria-modal
+      className="fixed inset-0 bg-black text-white flex flex-col z-[9999]"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transition: "opacity 200ms ease",
+      }}
+      onClick={handleClose}
     >
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-3 py-2">
-        <div className="text-sm opacity-80">
-          {index + 1} / {count || 1}
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 bg-gradient-to-b from-black/50 to-transparent">
+        <span className="text-sm opacity-80">
+          {currentIndex + 1} / {imageCount}
+        </span>
         <button
-          onClick={onClose}
-          className="px-3 py-1 rounded bg-white/10 hover:bg-white/20"
+          onClick={handleClose}
+          className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-sm"
+          dir="rtl"
         >
-          Close
+          بستن
         </button>
       </div>
 
-      {/* Image area */}
+      {/* Main Image Area */}
       <div
-        className="flex-1 grid place-items-center select-none overflow-hidden"
+        ref={containerRef}
+        className="flex-1 flex items-center justify-center relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onDoubleClick={onDoubleClick}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onDoubleClick={(e) => toggleZoom(e)}
       >
-        <div
-          className="flex items-center w-full"
+        <img
+          key={`image-${currentIndex}`}
+          src={imageUrl}
+          alt={imageCaption || `Image ${currentIndex + 1}`}
+          className="max-h-full max-w-full object-contain select-none"
+          draggable={false}
           style={{
-            transform: `translateX(${dragX}px)`,
-            transition: dragging ? "none" : "transform 180ms ease",
+            transform: `scale(${scale}) translate(${offset.x / scale}px, ${offset.y / scale}px)`,
+            transition: "transform 300ms ease-out",
           }}
-        >
-          <img
-            src={url}
-            alt={caption || `image-${index}`}
-            className="mx-auto max-h-[80vh] max-w-[95vw] object-contain"
-            draggable={false}
-            style={{ transform: `scale(${scale}) translate(${offset.x / scale}px, ${offset.y / scale}px)`, transition: dragging ? 'none' : 'transform 120ms ease' }}
-            onDoubleClick={onDoubleClick}
-          />
-        </div>
+        />
       </div>
 
       {/* Caption */}
-      {caption ? (
-        <div className="px-4 pb-3 text-sm opacity-90" onClick={(e) => e.stopPropagation()}>
-          {caption}
+      {imageCaption && (
+        <div className="px-4 py-2 text-sm opacity-90 bg-gradient-to-t from-black/50 to-transparent">
+          {imageCaption}
         </div>
-      ) : null}
+      )}
 
-      {/* Controls */}
-      {count > 1 && (
-        <div className="absolute inset-y-0 left-0 right-0 pointer-events-none">
-          <button
-            className="pointer-events-auto absolute left-1 top-1/2 -translate-y-1/2 px-2 py-2 rounded bg-white/10 hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              go(-1);
+      {/* Thumbnail Navigation */}
+      {imageCount > 1 && (
+        <div className="px-4 pb-6 pt-4 bg-gradient-to-t from-black/60 to-transparent">
+          <div 
+            ref={thumbnailsRef}
+            className="flex gap-2 overflow-x-auto py-2 px-2 scrollbar-hide"
+            style={{
+              minHeight: "80px",
+              alignItems: "center",
+              justifyContent: imageCount <= 5 ? "center" : "flex-start",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              scrollPaddingInline: "20px"
             }}
           >
-            ‹
-          </button>
-          <button
-            className="pointer-events-auto absolute right-1 top-1/2 -translate-y-1/2 px-2 py-2 rounded bg-white/10 hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              go(1);
-            }}
-          >
-            ›
-          </button>
+            {images.map((img, index) => {
+              const thumbUrl = img?.url || img;
+              const isActive = index === currentIndex;
+              
+              return (
+                <div
+                  key={index}
+                  className="flex-shrink-0 flex items-center justify-center"
+                  style={{
+                    minWidth: "60px",
+                    height: "80px",
+                  }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToIndex(index);
+                    }}
+                    className={`rounded-xl overflow-hidden transition-all duration-300 ${
+                      isActive ? "ring-2 ring-white shadow-lg" : "opacity-70 hover:opacity-90"
+                    }`}
+                    style={{
+                      width: isActive ? "64px" : "50px",
+                      height: isActive ? "64px" : "50px",
+                      transform: isActive ? "scale(1.05)" : "scale(1)",
+                    }}
+                  >
+                    <img
+                      src={thumbUrl}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                    />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
   );
+
+  return typeof window !== "undefined" 
+    ? createPortal(sliderContent, document.body) 
+    : null;
 }
