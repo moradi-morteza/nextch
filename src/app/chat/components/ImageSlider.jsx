@@ -25,6 +25,9 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     
+    // Add history entry for back button handling
+    window.history.pushState({ imageSlider: true }, '');
+    
     // Prevent touch events from reaching background elements
     const preventTouch = (e) => {
       // Only prevent if the event target is not within our slider
@@ -52,8 +55,12 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
       if (e.key === "ArrowRight") goToNext();
     };
     
-    // Android back button
-    const handlePopState = () => handleClose();
+    // Android back button - only close slider if it's our history state
+    const handlePopState = (e) => {
+      if (e.state?.imageSlider) {
+        handleClose();
+      }
+    };
     
     // Add event listeners with capture=true to catch events early
     document.addEventListener("touchstart", preventTouch, { capture: true, passive: false });
@@ -80,6 +87,10 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
 
   const handleClose = () => {
     setIsVisible(false);
+    // Remove our history entry if it's still there
+    if (window.history.state?.imageSlider) {
+      window.history.back();
+    }
     setTimeout(() => onClose?.(), 200);
   };
 
