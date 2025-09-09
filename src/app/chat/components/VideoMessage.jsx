@@ -10,11 +10,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 export default function VideoMessage({ url, mediaId, width, height, duration, variant = 'me', timestamp }) {
   const [videoUrl, setVideoUrl] = useState(url);
-  const [loading, setLoading] = useState(!url && !!mediaId); // Loading if we need to fetch from IndexedDB
+  const [loading, setLoading] = useState(!!mediaId && !url); // Loading if we need to fetch from IndexedDB
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false); // This handles video data loading
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   
@@ -131,16 +131,24 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
         onLoadedData={handleVideoLoaded}
       />
       
-      {/* Loading spinner overlay */}
+      {/* Loading state - clean and elegant */}
       {(loading || !videoLoaded) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <div className="bg-white/90 rounded-full p-2">
-            <CircularProgress size={32} sx={{ color: '#374151' }} />
-          </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
+          <CircularProgress 
+            size={40} 
+            thickness={3}
+            sx={{ 
+              color: 'white',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+            }} 
+          />
+          <span className="text-white text-sm mt-2 font-medium bg-black/30 px-2 py-1 rounded" dir="rtl">
+            در حال بارگذاری...
+          </span>
         </div>
       )}
       
-      {/* Custom play button overlay (only in normal mode when not loading) */}
+      {/* Custom play button overlay (only when loaded and not loading) */}
       {!isFullscreen && !loading && videoLoaded && !isPlaying && (
         <div 
           className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
