@@ -39,7 +39,17 @@ export default function ChatScreen() {
 
   useEffect(() => {
     if (!listRef.current) return;
-    listRef.current.scrollTop = listRef.current.scrollHeight;
+    const scrollToBottom = () => {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    };
+    
+    // Scroll immediately
+    scrollToBottom();
+    
+    // Also scroll after a delay to account for video/media loading
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   const handleSend = (value) => {
