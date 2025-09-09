@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useEffect, useState, useRef } from "react";
-import { getMediaUrl } from "../../../utils/mediaStorage";
-import mediaManager from "../../../utils/mediaManager";
+import { getMediaUrl } from "@/utils/mediaStorage";
+import mediaManager from "@/utils/mediaManager";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
@@ -18,7 +18,7 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const uniqueMediaId = useRef(`video-${Date.now()}-${Math.random()}`).current;
-  
+
   const fmt = (s) => {
     const mm = String(Math.floor((s || 0) / 60)).padStart(2, "0");
     const ss = String(Math.floor((s || 0) % 60)).padStart(2, "0");
@@ -67,17 +67,17 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
     setIsPlaying(true);
     mediaManager.play(videoRef.current, uniqueMediaId);
   };
-  
+
   const handleVideoPause = () => {
     setIsPlaying(false);
     mediaManager.pause(videoRef.current, uniqueMediaId);
   };
-  
+
   const handleVideoEnded = () => {
     setIsPlaying(false);
     mediaManager.ended(videoRef.current, uniqueMediaId);
   };
-  
+
   const handleVideoLoaded = () => setVideoLoaded(true);
 
   const toggleFullscreen = async () => {
@@ -112,7 +112,7 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
     if (videoElement && videoLoaded) {
       mediaManager.register(videoElement, uniqueMediaId);
     }
-    
+
     return () => {
       mediaManager.unregister(uniqueMediaId);
     };
@@ -141,9 +141,9 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
   }, []);
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={`relative rounded-lg overflow-hidden ${isFullscreen ? 'bg-black w-full h-full' : ''}`} 
+      className={`relative rounded-lg overflow-hidden ${isFullscreen ? 'bg-black w-full h-full' : ''}`}
       style={isFullscreen ? {} : { maxWidth: `${maxW}px`, maxHeight: `${maxH}px` }}
     >
       <video
@@ -159,27 +159,27 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
         onLoadedData={handleVideoLoaded}
         onCanPlay={handleVideoLoaded}
       />
-      
+
       {/* Loading state - clean and elegant */}
       {(loading || !videoLoaded) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
-          <CircularProgress 
-            size={40} 
+          <CircularProgress
+            size={40}
             thickness={3}
-            sx={{ 
+            sx={{
               color: 'white',
               filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }} 
+            }}
           />
           <span className="text-white text-sm mt-2 font-medium bg-black/30 px-2 py-1 rounded" dir="rtl">
             در حال بارگذاری...
           </span>
         </div>
       )}
-      
+
       {/* Custom play button overlay (only when loaded and not loading) */}
       {!isFullscreen && !loading && videoLoaded && !isPlaying && (
-        <div 
+        <div
           className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
           onClick={handlePlayPause}
         >
@@ -188,10 +188,10 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
           </div>
         </div>
       )}
-      
+
       {/* Pause button when playing (only in normal mode) */}
       {!isFullscreen && isPlaying && videoLoaded && (
-        <div 
+        <div
           className="absolute inset-0 flex items-center justify-center cursor-pointer opacity-0 hover:opacity-100 transition-opacity duration-200"
           onClick={handlePlayPause}
         >
@@ -200,11 +200,11 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
           </div>
         </div>
       )}
-      
+
       {/* Fullscreen button (only when video is loaded and not in fullscreen) */}
       {!isFullscreen && !loading && videoLoaded && (
         <div className="absolute top-2 right-2">
-          <div 
+          <div
             className="bg-black/50 hover:bg-black/70 rounded-full p-1.5 cursor-pointer transition-all duration-200"
             onClick={toggleFullscreen}
           >
@@ -212,11 +212,11 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
           </div>
         </div>
       )}
-      
+
       {/* Exit fullscreen button */}
       {isFullscreen && (
         <div className="absolute top-4 right-4 z-10">
-          <div 
+          <div
             className="bg-black/70 hover:bg-black/90 rounded-full p-2 cursor-pointer transition-all duration-200"
             onClick={toggleFullscreen}
           >
@@ -224,7 +224,7 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
           </div>
         </div>
       )}
-      
+
       {/* Duration and time overlay (only in normal mode) */}
       {!isFullscreen && (
         <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center pointer-events-none">

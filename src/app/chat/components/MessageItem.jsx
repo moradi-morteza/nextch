@@ -276,7 +276,12 @@ export default function MessageItem({ message, selectionMode = false, isSelected
         )}
         {!isSystem && message.type !== 'audio' && message.type !== 'video' && (
           <div className="mt-1 text-[11px] text-gray-500 text-right">
-            {new Date(message.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            {(() => {
+              const date = new Date(message.ts);
+              const hours = String(date.getHours()).padStart(2, '0');
+              const minutes = String(date.getMinutes()).padStart(2, '0');
+              return `${hours}:${minutes}`;
+            })()}
           </div>
         )}
       </div>
