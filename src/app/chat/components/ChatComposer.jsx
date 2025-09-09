@@ -356,8 +356,8 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 className="w-24 h-24 object-cover rounded-lg"
               />
               {images.length > 1 && (
-                <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded-full text-xs text-white"
-                     style={{ background: 'rgba(0,0,0,0.6)' }}>
+                <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded-full text-sm font-bold text-white"
+                     style={{ background: 'rgba(0,0,0,0.6)' }} dir="rtl">
                   +{images.length - 1}
                 </div>
               )}
