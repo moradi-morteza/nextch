@@ -164,7 +164,7 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
-      <div className="w-[min(520px,92vw)] p-4 text-center text-white relative">
+      <div className="w-[min(520px,92vw)] p-4 text-center text-white relative" dir="rtl">
         {/* Recording ripple effect */}
         {recording && (
           <div className="absolute inset-0 pointer-events-none">
@@ -175,17 +175,14 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
         )}
         
         <div className="flex items-center justify-center gap-3 mb-4 relative z-10">
-          <div className={`relative ${recording && !paused ? 'recording-pulse' : ''}`}>
+          <div className="relative flex items-center justify-center">
             <span className={`inline-block rounded-full transition-all duration-300 ${
               recording && !paused 
-                ? 'bg-red-500 fade-dot' 
+                ? 'bg-red-500 animate-pulse' 
                 : recording && paused 
                 ? 'bg-yellow-500' 
                 : 'bg-white/50'
-            }`} style={{ width: 16, height: 16 }} />
-            {recording && !paused && (
-              <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></span>
-            )}
+            }`} style={{ width: 12, height: 12 }} />
           </div>
           <span className={`font-mono text-xl transition-all duration-300 ${
             recording && !paused 
@@ -196,7 +193,9 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
           }`}>{mm}:{ss}</span>
         </div>
         
-        <div className="text-base text-white/90 mb-3 font-medium">ضبط صوت</div>
+        <div className="text-base text-white/90 mb-3 font-medium">
+          {recording && !paused ? 'در حال ضبط...' : 'ضبط صوت'}
+        </div>
         {errMsg && (
           <div className="mx-auto mb-4 max-w-md text-[13px] text-red-300 bg-red-500/10 p-2 rounded-lg">{errMsg}</div>
         )}
@@ -261,12 +260,6 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
       </div>
       
       <style jsx>{`
-        .fade-dot { animation: fadeInOut 1.8s ease-in-out infinite; }
-        @keyframes fadeInOut {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
-        }
-        
         .recording-ripple {
           position: absolute;
           top: 50%;
@@ -308,21 +301,6 @@ export default function VoiceRecorder({ open = false, onClose, onSubmit }) {
         @keyframes waveform {
           0%, 100% { height: 4px; }
           50% { height: 24px; }
-        }
-        
-        .recording-pulse {
-          animation: pulse-glow 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-glow {
-          0%, 100% { 
-            transform: scale(1);
-            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
-          }
-          50% { 
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.8));
-          }
         }
       `}</style>
     </div>

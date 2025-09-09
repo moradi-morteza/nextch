@@ -203,26 +203,40 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center" role="dialog" aria-modal>
-      <div className="w-[min(560px,94vw)] p-4 text-white relative">
+      <div className="w-[min(560px,94vw)] p-4 text-white relative" dir="rtl">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <div className={`relative ${recording ? 'recording-pulse' : ''}`}>
-            <span className={`inline-block rounded-full ${recording ? 'bg-red-500 fade-dot' : 'bg-white/50'}`} style={{ width: 16, height: 16 }} />
-            {recording && (
-              <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></span>
-            )}
+          <div className="relative flex items-center justify-center">
+            <span className={`inline-block rounded-full transition-all duration-300 ${
+              recording && !paused 
+                ? 'bg-red-500 animate-pulse' 
+                : recording && paused 
+                ? 'bg-yellow-500' 
+                : 'bg-white/50'
+            }`} style={{ width: 12, height: 12 }} />
           </div>
-          <span className={`font-mono text-xl transition-all duration-300 ${recording ? 'text-red-400 scale-110' : 'text-white'}`}>{mm}:{ss}</span>
+          <span className={`font-mono text-xl transition-all duration-300 ${
+            recording && !paused 
+              ? 'text-red-400 scale-110' 
+              : recording && paused 
+              ? 'text-yellow-400 scale-105' 
+              : 'text-white'
+          }`}>{mm}:{ss}</span>
         </div>
         
-        <div className="text-base text-white/90 mb-3 text-center font-medium">ضبط ویدیو</div>
+        <div className="text-base text-white/90 mb-3 text-center font-medium">
+          {recording && !paused ? 'در حال ضبط...' : 'ضبط ویدیو'}
+        </div>
         {errMsg && <div className="mx-auto mb-4 max-w-md text-[13px] text-red-300 text-center bg-red-500/10 p-2 rounded-lg">{errMsg}</div>}
 
-        {/* Preview frame with recording effects */}
+        {/* Preview frame with recording effects - responsive sizing */}
         <div className={`mx-auto mb-4 w-full max-w-md rounded-xl overflow-hidden bg-black/60 ring-1 transition-all duration-300 ${
           recording 
             ? 'ring-red-500 ring-2 shadow-lg shadow-red-500/30' 
             : 'ring-white/10'
-        }`} style={{ aspectRatio: '3 / 4' }}>
+        }`} style={{ 
+          aspectRatio: '3 / 4',
+          maxHeight: 'min(60vh, 400px)' // Limit height on desktop
+        }}>
           <div className="relative w-full h-full">
             <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
             
@@ -288,27 +302,6 @@ export default function VideoRecorder({ open = false, onClose, onSubmit }) {
       </div>
 
       <style jsx>{`
-        .fade-dot { animation: fadeInOut 1.8s ease-in-out infinite; }
-        @keyframes fadeInOut { 
-          0%, 100% { opacity: 0.3; } 
-          50% { opacity: 1; } 
-        }
-        
-        .recording-pulse {
-          animation: pulse-glow 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-glow {
-          0%, 100% { 
-            transform: scale(1);
-            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
-          }
-          50% { 
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.8));
-          }
-        }
-        
         .bg-gradient-radial {
           background: radial-gradient(circle at center, var(--tw-gradient-stops));
         }
