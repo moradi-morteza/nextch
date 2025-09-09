@@ -1,6 +1,7 @@
 .root {
   width: 100%;
   position: relative;
+  overflow-x: hidden;
 }
 
 .row {
@@ -10,6 +11,8 @@
   align-items: flex-end; /* keep icons pinned to bottom when textarea grows */
   gap: 0.235rem; /* tighter gap between item like bottombar chat icon space */
   padding: 10px 5px; /* extra 10px top/bottom + 5px left/right padding */
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .iconTight {

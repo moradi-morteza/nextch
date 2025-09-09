@@ -41,6 +41,9 @@ body {
   font-family: "Yekan Bakh FaNum", var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI,
     Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
+  overflow-x: hidden;
+  width: 100vw;
+  max-width: 100vw;
 }
 
 /* Optional utility to apply the local font explicitly */

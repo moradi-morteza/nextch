@@ -118,7 +118,7 @@ export default function ChatScreen() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <main className="h-[100dvh] w-full flex flex-col bg-white overflow-hidden">
+      <main className="h-[100dvh] w-full flex flex-col bg-white overflow-x-hidden">
         {selectionMode ? (
           <div className="flex items-center justify-between px-4 py-3 bg-white shadow-md">
             <div className="flex items-center gap-2">
