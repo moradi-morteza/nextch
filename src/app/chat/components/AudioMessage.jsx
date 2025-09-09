@@ -13,7 +13,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
   const wavesurferRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [audioUrl, setAudioUrl] = useState(url);
   const [loading, setLoading] = useState(!!mediaId && !url);
   const audioUrlRef = useRef(null);
@@ -97,7 +97,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
         mediaManager.register(ws.getMediaElement(), uniqueMediaId);
       }
     };
-    const onTime = (t) => setCurrent(t);
+    const onTime = (t) => setCurrentTime(t);
     const onFinish = () => {
       setPlaying(false);
       mediaManager.ended(ws.getMediaElement(), uniqueMediaId);
@@ -170,7 +170,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
       <div className="flex flex-col gap-1 w-full" dir="rtl">
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-[120px] pb-2 flex items-center justify-center">
-            <div className="text-sm text-gray-500">Loading audio...</div>
+            <div className="text-sm text-gray-500" dir="rtl">در حال بارگذاری صوت...</div>
           </div>
           <button
             disabled
@@ -213,7 +213,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
         {timestamp && (
           <span>{new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
         )}
-        <span>{fmt(current || duration || 0)}</span>
+        <span>{fmt(currentTime || duration || 0)}</span>
       </div>
     </div>
   );

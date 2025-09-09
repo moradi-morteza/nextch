@@ -13,7 +13,6 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
   const [videoUrl, setVideoUrl] = useState(url);
   const [loading, setLoading] = useState(!!mediaId && !url); // Loading if we need to fetch from IndexedDB
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showControls, setShowControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false); // This handles video data loading
   const videoRef = useRef(null);
@@ -109,14 +108,15 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
 
   // Register/unregister with media manager
   useEffect(() => {
-    if (videoRef.current) {
-      mediaManager.register(videoRef.current, uniqueMediaId);
+    const videoElement = videoRef.current;
+    if (videoElement && videoLoaded) {
+      mediaManager.register(videoElement, uniqueMediaId);
     }
     
     return () => {
       mediaManager.unregister(uniqueMediaId);
     };
-  }, [uniqueMediaId]);
+  }, [uniqueMediaId, videoLoaded]);
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -157,6 +157,7 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
         onPause={handleVideoPause}
         onEnded={handleVideoEnded}
         onLoadedData={handleVideoLoaded}
+        onCanPlay={handleVideoLoaded}
       />
       
       {/* Loading state - clean and elegant */}
