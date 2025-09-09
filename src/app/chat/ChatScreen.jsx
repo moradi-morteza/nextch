@@ -16,30 +16,17 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
     makeSystem({ text: "Today" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
-    makeText({ text: "درورد بر تو حالت خوبه؟ واقعا ای جان" }),
+    makeText({ text: "سلام وقت بخیر، من می‌خواستم بدونم برای کاهش وزن چه رژیمی بهتره؟" }),
+    makeText({ text: "آیا لازمه حتما نان و برنج رو کامل حذف کنم؟ من بعضی وقتا خیلی هوس شیرینی می‌کنم، باید کلا قطعش کنم؟" }),
+    makeText({ text: "فعالیت بدنی من کمه، این موضوع چقدر توی رژیم اثر داره؟" }),
+
+
+
+
+    makeText({ text: "سلام، وقت شما هم بخیر. اول اینکه هیچ رژیمی قرار نیست خیلی سختگیرانه باشه، هدف تعادل هست نه حذف کامل.", from: "them" }),
+    makeText({ text: "نان و برنج رو لازم نیست حذف کنید، فقط مقدار و نوعش مهمه. نان سبوس‌دار یا برنج قهوه‌ای بهتره. \n شیرینی رو می‌تونید گهگاهی و در مقدار کم مصرف کنید، ولی جایگزین‌های سالم مثل میوه خشک یا شکلات تلخ بهتر هست. \n فعالیت بدنی خیلی تأثیر داره؛ حتی پیاده‌روی نیم ساعت در روز می‌تونه نتیجه رژیم رو چند برابر کنه.", from: "them" }),
+    makeText({ text: "پیشنهاد می‌کنم یک برنامه شخصی‌سازی‌شده با توجه به قد، وزن و شرایط بدنیتون تنظیم بشه تا بهترین نتیجه رو بگیرید.", from: "them" }),
+
     makeAudio({
       url: "https://budget.storage.iran.liara.space/sample.m4a",
       duration: 6,
@@ -59,16 +46,53 @@ export default function ChatScreen() {
   const [newMessageIds, setNewMessageIds] = useState(new Set());
   const listRef = useRef(null);
 
+  // Initial scroll to bottom on mount and content changes
+  useEffect(() => {
+    if (!listRef.current) return;
+
+    const scrollToBottom = () => {
+      if (listRef.current) {
+        listRef.current.scrollTop = listRef.current.scrollHeight;
+      }
+    };
+
+    // Multiple attempts to ensure we get to bottom
+    const timeouts = [
+      setTimeout(scrollToBottom, 0),      // Immediate
+      setTimeout(scrollToBottom, 50),     // After render
+      setTimeout(scrollToBottom, 200),    // After animations start
+      setTimeout(scrollToBottom, 500),    // After animations complete
+      setTimeout(scrollToBottom, 1000),   // Final insurance
+    ];
+
+    // Also observe content size changes
+    let resizeObserver;
+    if (listRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(scrollToBottom);
+      });
+      resizeObserver.observe(listRef.current);
+    }
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, []); // Only run on mount
+
+  // Scroll to bottom when messages change (for new messages)
   useEffect(() => {
     if (!listRef.current) return;
     const scrollToBottom = () => {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
+      if (listRef.current) {
+        listRef.current.scrollTop = listRef.current.scrollHeight;
+      }
     };
 
-    // Scroll immediately
+    // Scroll immediately and after delay for media loading
     scrollToBottom();
-
-    // Also scroll after a delay to account for video/media loading
     const timeoutId = setTimeout(scrollToBottom, 100);
 
     return () => clearTimeout(timeoutId);
@@ -169,6 +193,7 @@ export default function ChatScreen() {
                   onSelect={() => handleMessageSelect(m.id)}
                   isNewMessage={newMessageIds.has(m.id)}
                   messageIndex={index}
+                  totalMessages={messages.length}
                 />
               ))}
             </ul>
