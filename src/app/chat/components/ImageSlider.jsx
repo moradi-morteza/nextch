@@ -239,7 +239,10 @@ export default function ImageSlider({ images = [], startIndex = 0, onClose }) {
           {currentIndex + 1} / {imageCount}
         </span>
         <button
-          onClick={handleClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClose();
+          }}
           className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-sm"
           dir="rtl"
         >
