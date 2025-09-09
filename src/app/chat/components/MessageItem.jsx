@@ -155,9 +155,19 @@ export default function MessageItem({ message, selectionMode = false, isSelected
               <img
                 src={message.content}
                 alt={message.caption || "image"}
-                className="block w-full h-auto cursor-zoom-in"
-                style={{ maxHeight: IMAGE_MAX_HEIGHT_PX + "px", objectFit: "contain" }}
+                className="block w-full h-auto cursor-zoom-in select-none"
+                style={{ 
+                  maxHeight: IMAGE_MAX_HEIGHT_PX + "px", 
+                  objectFit: "contain",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  WebkitTouchCallout: "none"
+                }}
                 onClick={() => openSlider([{ url: message.content, caption: message.caption }], 0)}
+                onContextMenu={(e) => e.preventDefault()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                draggable={false}
               />
             </div>
             {message.caption && (
@@ -171,12 +181,39 @@ export default function MessageItem({ message, selectionMode = false, isSelected
             <div className="grid gap-1" style={{ gridTemplateColumns: (message.images?.length || 0) <= 1 ? '1fr' : '1fr 1fr' }}>
               {(message.images || []).slice(0,4).map((img, idx)=> (
                 <div key={idx} className={(message.images?.length===3 && idx===0)? 'col-span-2 md:col-span-1 row-span-2':''} style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }}>
-                  <img src={img.url} alt={`img-${idx}`} className="w-full h-full object-cover block cursor-zoom-in" onClick={() => openSlider(message.images, idx)} />
+                  <img 
+                    src={img.url} 
+                    alt={`img-${idx}`} 
+                    className="w-full h-full object-cover block cursor-zoom-in select-none" 
+                    onClick={() => openSlider(message.images, idx)}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => e.stopPropagation()}
+                    draggable={false}
+                    style={{
+                      userSelect: "none",
+                      WebkitUserSelect: "none",
+                      WebkitTouchCallout: "none"
+                    }}
+                  />
                 </div>
               ))}
               {message.images && message.images.length>4 && (
                 <div className="relative cursor-zoom-in" style={{ overflow:'hidden', borderRadius:'10px', maxWidth:'280px', maxHeight:'180px' }} onClick={() => openSlider(message.images, 4)}>
-                  <img src={message.images[4].url} alt="more" className="w-full h-full object-cover block opacity-70" />
+                  <img 
+                    src={message.images[4].url} 
+                    alt="more" 
+                    className="w-full h-full object-cover block opacity-70 select-none"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => e.stopPropagation()}
+                    draggable={false}
+                    style={{
+                      userSelect: "none",
+                      WebkitUserSelect: "none",
+                      WebkitTouchCallout: "none"
+                    }}
+                  />
                   <div className="absolute inset-0 grid place-items-center text-white text-lg font-semibold" style={{ background:'rgba(0,0,0,0.4)' }}>+{message.images.length-4}</div>
                 </div>
               )}
