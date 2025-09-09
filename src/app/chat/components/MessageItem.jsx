@@ -117,8 +117,8 @@ export default function MessageItem({ message, selectionMode = false, isSelected
       )}
       <div
         className={
-          isSystem
-            ? "px-2 py-2 text-[14px] leading-4 rounded-lg bg-black/45 text-white mx-auto backdrop-blur-sm"
+          isSystem || message.type === 'video'
+            ? (isSystem ? "px-2 py-2 text-[14px] leading-4 rounded-lg bg-black/45 text-white mx-auto backdrop-blur-sm" : "")
             : `${styles.bubble} px-3 py-2 text-[15px] leading-snug rounded-2xl shadow-sm ${
                 isMe ? `${styles.me} bubble-me` : `${styles.them} bubble-them`
               } ${selectionMode && canSelect ? 'cursor-pointer' : ''} ${isSelected ? 'ring-2 ring-blue-400' : ''}`
@@ -129,7 +129,7 @@ export default function MessageItem({ message, selectionMode = false, isSelected
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
         style={{
-          ...((isSystem) ? undefined : {
+          ...((isSystem || message.type === 'video') ? undefined : {
             direction: 'rtl',
             unicodeBidi: 'isolate-override',
             ...(message.type === 'audio' ? { minWidth: '50%' } : {}),

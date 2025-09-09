@@ -1,11 +1,22 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { getMediaUrl } from "../../../utils/mediaStorage";
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function VideoMessage({ url, mediaId, width, height, duration, variant = 'me', timestamp }) {
   const [videoUrl, setVideoUrl] = useState(url);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!url && !!mediaId); // Loading if we need to fetch from IndexedDB
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
   
   const fmt = (s) => {
     const mm = String(Math.floor((s || 0) / 60)).padStart(2, "0");
@@ -39,39 +50,155 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
     height: "auto",
   }), []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-start gap-1" style={{ maxWidth: `${maxW}px` }}>
-        <div className="rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center" style={{ maxWidth: `${maxW}px`, maxHeight: `${maxH}px`, minHeight: '120px' }}>
-          <div className="text-sm text-gray-500">Loading video...</div>
-        </div>
-        <div className="flex justify-between items-center w-full text-[11px] text-gray-500">
-          {timestamp && (
-            <span>{new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-          )}
-          <span>{fmt(duration)}</span>
-        </div>
-      </div>
-    );
-  }
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+    }
+  };
+
+  const handleVideoPlay = () => setIsPlaying(true);
+  const handleVideoPause = () => setIsPlaying(false);
+  const handleVideoLoaded = () => setVideoLoaded(true);
+
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return;
+
+    try {
+      if (!isFullscreen) {
+        if (containerRef.current.requestFullscreen) {
+          await containerRef.current.requestFullscreen();
+        } else if (containerRef.current.webkitRequestFullscreen) {
+          await containerRef.current.webkitRequestFullscreen();
+        } else if (containerRef.current.mozRequestFullScreen) {
+          await containerRef.current.mozRequestFullScreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        }
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   return (
-    <div className="flex flex-col items-start gap-1" style={{ maxWidth: `${maxW}px` }}>
-      <div className="rounded-lg overflow-hidden" style={{ maxWidth: `${maxW}px`, maxHeight: `${maxH}px` }}>
-        <video
-          src={videoUrl}
-          controls
-          playsInline
-          className="block w-full h-auto"
-          style={style}
-        />
-      </div>
-      <div className="flex justify-between items-center w-full text-[11px] text-gray-500">
-        {timestamp && (
-          <span>{new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-        )}
-        <span>{fmt(duration)}</span>
-      </div>
+    <div 
+      ref={containerRef}
+      className={`relative rounded-lg overflow-hidden ${isFullscreen ? 'bg-black w-full h-full' : ''}`} 
+      style={isFullscreen ? {} : { maxWidth: `${maxW}px`, maxHeight: `${maxH}px` }}
+    >
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        playsInline
+        controls={isFullscreen} // Show native controls in fullscreen
+        className="block w-full h-auto"
+        style={isFullscreen ? { width: '100%', height: '100%', objectFit: 'contain' } : style}
+        onPlay={handleVideoPlay}
+        onPause={handleVideoPause}
+        onEnded={() => setIsPlaying(false)}
+        onLoadedData={handleVideoLoaded}
+      />
+      
+      {/* Loading spinner overlay */}
+      {(loading || !videoLoaded) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="bg-white/90 rounded-full p-2">
+            <CircularProgress size={32} sx={{ color: '#374151' }} />
+          </div>
+        </div>
+      )}
+      
+      {/* Custom play button overlay (only in normal mode when not loading) */}
+      {!isFullscreen && !loading && videoLoaded && !isPlaying && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
+          onClick={handlePlayPause}
+        >
+          <div className="bg-white/90 hover:bg-white rounded-full p-3 transition-all duration-200 transform hover:scale-110 shadow-lg">
+            <PlayArrowIcon sx={{ fontSize: 32, color: '#374151' }} />
+          </div>
+        </div>
+      )}
+      
+      {/* Pause button when playing (only in normal mode) */}
+      {!isFullscreen && isPlaying && videoLoaded && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center cursor-pointer opacity-0 hover:opacity-100 transition-opacity duration-200"
+          onClick={handlePlayPause}
+        >
+          <div className="bg-black/50 hover:bg-black/70 rounded-full p-2 transition-all duration-200">
+            <PauseIcon sx={{ fontSize: 28, color: 'white' }} />
+          </div>
+        </div>
+      )}
+      
+      {/* Fullscreen button (only when video is loaded and not in fullscreen) */}
+      {!isFullscreen && !loading && videoLoaded && (
+        <div className="absolute top-2 right-2">
+          <div 
+            className="bg-black/50 hover:bg-black/70 rounded-full p-1.5 cursor-pointer transition-all duration-200"
+            onClick={toggleFullscreen}
+          >
+            <FullscreenIcon sx={{ fontSize: 20, color: 'white' }} />
+          </div>
+        </div>
+      )}
+      
+      {/* Exit fullscreen button */}
+      {isFullscreen && (
+        <div className="absolute top-4 right-4 z-10">
+          <div 
+            className="bg-black/70 hover:bg-black/90 rounded-full p-2 cursor-pointer transition-all duration-200"
+            onClick={toggleFullscreen}
+          >
+            <FullscreenExitIcon sx={{ fontSize: 24, color: 'white' }} />
+          </div>
+        </div>
+      )}
+      
+      {/* Duration and time overlay (only in normal mode) */}
+      {!isFullscreen && (
+        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center pointer-events-none">
+          <span className="text-xs text-white bg-black/50 px-2 py-1 rounded backdrop-blur-sm">{fmt(duration)}</span>
+          {timestamp && (
+            <span className="text-xs text-white bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
+              {new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

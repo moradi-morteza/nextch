@@ -18,6 +18,18 @@ export default function ChatScreen() {
     makeSystem({ text: "Today" }),
     makeText({ text: "سلام دوست من یه خبر خوب برات دارم ویزایی که منتظرش بودی بالاخره صادر شد!", from: "them" }),
     makeText({ text: "درورد بر تو حالت خوبه؟ واقعا ای جان" }),
+    makeAudio({
+      url: "https://budget.storage.iran.liara.space/sample.m4a",
+      duration: 6,
+      from: "them"
+    }),
+    makeVideo({
+      url: "https://budget.storage.iran.liara.space/Recording%202025-01-11%20100153.mp4",
+      duration: 45,
+      width: 720,
+      height: 1280,
+      from: "them"
+    }),
     makeSystem({ text: "سلام دوست گرامی شما میتوانید در این گفتگو به خوبی شرکت کنید و بهترین و برترین نمایشن نامه های یی که برای شما نوشته شده است را پیدا کنید." }),
   ]);
   const [selectedMessages, setSelectedMessages] = useState([]);
@@ -53,8 +65,8 @@ export default function ChatScreen() {
       setSelectionMode(true);
       setSelectedMessages([messageId]);
     } else {
-      setSelectedMessages(prev => 
-        prev.includes(messageId) 
+      setSelectedMessages(prev =>
+        prev.includes(messageId)
           ? prev.filter(id => id !== messageId)
           : [...prev, messageId]
       );
@@ -117,9 +129,9 @@ export default function ChatScreen() {
           <div className="max-w-3xl mx-auto w-full">
             <ul className="space-y-1.5">
               {messages.map((m, index) => (
-                <MessageItem 
-                  key={m.id} 
-                  message={m} 
+                <MessageItem
+                  key={m.id}
+                  message={m}
                   selectionMode={selectionMode}
                   isSelected={selectedMessages.includes(m.id)}
                   onSelect={() => handleMessageSelect(m.id)}
