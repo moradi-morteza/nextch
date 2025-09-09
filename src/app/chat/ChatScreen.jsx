@@ -15,61 +15,84 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
-    makeSystem({ text: "Today" }),
-    makeText({ text: "سلام وقت بخیر، من می‌خواستم بدونم برای کاهش وزن چه رژیمی بهتره؟" }),
-    makeText({ text: "آیا لازمه حتما نان و برنج رو کامل حذف کنم؟ من بعضی وقتا خیلی هوس شیرینی می‌کنم، باید کلا قطعش کنم؟" }),
-    makeText({ text: "فعالیت بدنی من کمه، این موضوع چقدر توی رژیم اثر داره؟" }),
+    { ...makeSystem({ text: "Today" }), is_read: true },
+    { ...makeText({ text: "سلام وقت بخیر، من می‌خواستم بدونم برای کاهش وزن چه رژیمی بهتره؟" }), is_read: true },
+    { ...makeText({ text: "آیا لازمه حتما نان و برنج رو کامل حذف کنم؟ من بعضی وقتا خیلی هوس شیرینی می‌کنم، باید کلا قطعش کنم؟" }), is_read: true },
+    { ...makeText({ text: "فعالیت بدنی من کمه، این موضوع چقدر توی رژیم اثر داره؟" }), is_read: true },
 
 
 
 
-    makeText({ text: "سلام، وقت شما هم بخیر. اول اینکه هیچ رژیمی قرار نیست خیلی سختگیرانه باشه، هدف تعادل هست نه حذف کامل.", from: "them" }),
-    makeText({ text: "نان و برنج رو لازم نیست حذف کنید، فقط مقدار و نوعش مهمه. نان سبوس‌دار یا برنج قهوه‌ای بهتره. \n شیرینی رو می‌تونید گهگاهی و در مقدار کم مصرف کنید، ولی جایگزین‌های سالم مثل میوه خشک یا شکلات تلخ بهتر هست. \n فعالیت بدنی خیلی تأثیر داره؛ حتی پیاده‌روی نیم ساعت در روز می‌تونه نتیجه رژیم رو چند برابر کنه.", from: "them" }),
-    makeText({ text: "پیشنهاد می‌کنم یک برنامه شخصی‌سازی‌شده با توجه به قد، وزن و شرایط بدنیتون تنظیم بشه تا بهترین نتیجه رو بگیرید.", from: "them" }),
+    // First unread message (from them) - this is where scroll should position
+    { ...makeText({ text: "سلام، وقت شما هم بخیر. اول اینکه هیچ رژیمی قرار نیست خیلی سختگیرانه باشه، هدف تعادل هست نه حذف کامل.", from: "them" }), is_read: false },
+    { ...makeText({ text: "نان و برنج رو لازم نیست حذف کنید، فقط مقدار و نوعش مهمه. نان سبوس‌دار یا برنج قهوه‌ای بهتره. \n شیرینی رو می‌تونید گهگاهی و در مقدار کم مصرف کنید، ولی جایگزین‌های سالم مثل میوه خشک یا شکلات تلخ بهتر هست. \n فعالیت بدنی خیلی تأثیر داره؛ حتی پیاده‌روی نیم ساعت در روز می‌تونه نتیجه رژیم رو چند برابر کنه.", from: "them" }), is_read: false },
+    { ...makeText({ text: "پیشنهاد می‌کنم یک برنامه شخصی‌سازی‌شده با توجه به قد، وزن و شرایط بدنیتون تنظیم بشه تا بهترین نتیجه رو بگیرید.", from: "them" }), is_read: false },
 
-    makeAudio({
+    { ...makeAudio({
       url: "https://budget.storage.iran.liara.space/sample.m4a",
       duration: 6,
       from: "them"
-    }),
-    makeVideo({
+    }), is_read: false },
+    { ...makeVideo({
       url: "https://budget.storage.iran.liara.space/Recording%202025-01-11%20100153.mp4",
       duration: 45,
       width: 720,
       height: 1280,
       from: "them"
-    }),
-    makeSystem({ text: "سلام دوست گرامی شما میتوانید در این گفتگو به خوبی شرکت کنید و بهترین و برترین نمایشن نامه های یی که برای شما نوشته شده است را پیدا کنید." }),
+    }), is_read: false },
+    { ...makeSystem({ text: "سلام دوست گرامی شما میتوانید در این گفتگو به خوبی شرکت کنید و بهترین و برترین نمایشن نامه های یی که برای شما نوشته شده است را پیدا کنید." }), is_read: false },
   ]);
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [selectionMode, setSelectionMode] = useState(false);
   const [newMessageIds, setNewMessageIds] = useState(new Set());
   const listRef = useRef(null);
 
-  // Initial scroll to bottom on mount and content changes
+  // Initial scroll to first unread message or bottom on mount
   useEffect(() => {
     if (!listRef.current) return;
 
-    const scrollToBottom = () => {
-      if (listRef.current) {
+    const scrollToPosition = () => {
+      if (!listRef.current) return;
+
+      // Find first unread message index
+      const firstUnreadIndex = messages.findIndex(msg => !msg.is_read);
+      
+      if (firstUnreadIndex === -1) {
+        // No unread messages, scroll to bottom
         listRef.current.scrollTop = listRef.current.scrollHeight;
+      } else {
+        // Scroll to first unread message
+        const messageItems = listRef.current.querySelectorAll('li');
+        const targetMessage = messageItems[firstUnreadIndex];
+        
+        if (targetMessage) {
+          // Scroll to show the unread message, accounting for some padding
+          const containerTop = listRef.current.scrollTop;
+          const containerHeight = listRef.current.clientHeight;
+          const messageTop = targetMessage.offsetTop;
+          const messageHeight = targetMessage.offsetHeight;
+          
+          // Position the unread message about 1/4 from the top of the viewport
+          const desiredTop = messageTop - (containerHeight / 4);
+          listRef.current.scrollTop = Math.max(0, desiredTop);
+        }
       }
     };
 
-    // Multiple attempts to ensure we get to bottom
+    // Multiple attempts to ensure proper positioning
     const timeouts = [
-      setTimeout(scrollToBottom, 0),      // Immediate
-      setTimeout(scrollToBottom, 50),     // After render
-      setTimeout(scrollToBottom, 200),    // After animations start
-      setTimeout(scrollToBottom, 500),    // After animations complete
-      setTimeout(scrollToBottom, 1000),   // Final insurance
+      setTimeout(scrollToPosition, 0),      // Immediate
+      setTimeout(scrollToPosition, 50),     // After render
+      setTimeout(scrollToPosition, 200),    // After animations start
+      setTimeout(scrollToPosition, 500),    // After animations complete
+      setTimeout(scrollToPosition, 1000),   // Final insurance
     ];
 
     // Also observe content size changes
     let resizeObserver;
     if (listRef.current) {
       resizeObserver = new ResizeObserver(() => {
-        requestAnimationFrame(scrollToBottom);
+        requestAnimationFrame(scrollToPosition);
       });
       resizeObserver.observe(listRef.current);
     }
@@ -102,7 +125,7 @@ export default function ChatScreen() {
     const newMessageId = Date.now();
     setMessages((m) => [
       ...m,
-      { id: newMessageId, type: "text", content: value, from: "me", ts: newMessageId },
+      { id: newMessageId, type: "text", content: value, from: "me", ts: newMessageId, is_read: true },
     ]);
     setNewMessageIds(prev => new Set([...prev, newMessageId]));
   };
@@ -111,7 +134,7 @@ export default function ChatScreen() {
     const newMessageId = Date.now();
     setMessages((m) => [
       ...m,
-      { id: newMessageId, type: "audio", content: url, blob, from: "me", ts: newMessageId, duration },
+      { id: newMessageId, type: "audio", content: url, blob, from: "me", ts: newMessageId, duration, is_read: true },
     ]);
     setNewMessageIds(prev => new Set([...prev, newMessageId]));
   };
@@ -203,25 +226,25 @@ export default function ChatScreen() {
         <ChatComposer
           onSendMessage={(text) => {
             const newMessageId = Date.now();
-            const newMessage = { ...makeText({ text }), id: newMessageId };
+            const newMessage = { ...makeText({ text }), id: newMessageId, is_read: true };
             setMessages((m) => [...m, newMessage]);
             setNewMessageIds(prev => new Set([...prev, newMessageId]));
           }}
           onVoiceMessage={({ mediaId, duration, url }) => {
             const newMessageId = Date.now();
-            const newMessage = { ...makeAudio({ mediaId, duration, url }), id: newMessageId };
+            const newMessage = { ...makeAudio({ mediaId, duration, url }), id: newMessageId, is_read: true };
             setMessages((m) => [...m, newMessage]);
             setNewMessageIds(prev => new Set([...prev, newMessageId]));
           }}
           onVideoMessage={({ mediaId, duration, width, height, url }) => {
             const newMessageId = Date.now();
-            const newMessage = { ...makeVideo({ mediaId, duration, width, height, url }), id: newMessageId };
+            const newMessage = { ...makeVideo({ mediaId, duration, width, height, url }), id: newMessageId, is_read: true };
             setMessages((m) => [...m, newMessage]);
             setNewMessageIds(prev => new Set([...prev, newMessageId]));
           }}
           onSendImage={({ url, caption, width, height }) => {
             const newMessageId = Date.now();
-            const newMessage = { ...makeImage({ image: { url, width, height }, caption }), id: newMessageId };
+            const newMessage = { ...makeImage({ image: { url, width, height }, caption }), id: newMessageId, is_read: true };
             setMessages((m) => [...m, newMessage]);
             setNewMessageIds(prev => new Set([...prev, newMessageId]));
           }}
@@ -231,14 +254,15 @@ export default function ChatScreen() {
               ...(items.length <= 1
                 ? makeImage({ image: items[0], caption })
                 : makeImageGroup({ images: items, caption })),
-              id: newMessageId
+              id: newMessageId,
+              is_read: true
             };
             setMessages((m) => [...m, newMessage]);
             setNewMessageIds(prev => new Set([...prev, newMessageId]));
           }}
           onSendFile={({ file, name, size, type, caption }) => {
             const newMessageId = Date.now();
-            const newMessage = { ...makeFile({ file, name, size, type, caption }), id: newMessageId };
+            const newMessage = { ...makeFile({ file, name, size, type, caption }), id: newMessageId, is_read: true };
             setMessages((m) => [...m, newMessage]);
             setNewMessageIds(prev => new Set([...prev, newMessageId]));
           }}

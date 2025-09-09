@@ -23,7 +23,12 @@ export function newId() {
 }
 
 export function base(from = "me") {
-  return { id: newId(), from, ts: Date.now() };
+  return { 
+    id: newId(), 
+    from, 
+    ts: Date.now(), 
+    is_read: from === "me" // User's own messages are always read, others default to unread
+  };
 }
 
 export function makeText({ text, from = "me" }) {
