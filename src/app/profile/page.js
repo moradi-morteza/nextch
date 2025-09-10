@@ -9,11 +9,46 @@ import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Profile() {
-  const [user] = useState({
-    name: 'User',
-    username: '@user',
+  return (
+    <ProtectedRoute>
+      <ProfileContent />
+    </ProtectedRoute>
+  );
+}
+
+function ProfileContent() {
+  const { user: authUser, logout } = useAuth();
+  
+  const getUserDisplayName = () => {
+    if (authUser?.first_name || authUser?.last_name) {
+      return `${authUser.first_name || ''} ${authUser.last_name || ''}`.trim();
+    }
+    if (authUser?.username) {
+      return authUser.username;
+    }
+    if (authUser?.phone) {
+      return authUser.phone;
+    }
+    return 'User';
+  };
+
+  const getUserDisplayUsername = () => {
+    if (authUser?.username) {
+      return `@${authUser.username}`;
+    }
+    if (authUser?.phone) {
+      return `@${authUser.phone.slice(-4)}`;
+    }
+    return '@user';
+  };
+  
+  const [userData] = useState({
+    name: getUserDisplayName(),
+    username: getUserDisplayUsername(),
     bio: 'Welcome to NextChat',
     avatar: '/default-avatar.png',
     stats: {
@@ -48,9 +83,9 @@ export default function Profile() {
                 <PersonRoundedIcon sx={{ fontSize: 48, color: 'white' }} />
               </div>
               
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h2>
-              <p className="text-gray-600 mb-3">{user.username}</p>
-              <p className="text-gray-700 mb-6 max-w-sm">{user.bio}</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">{userData.name}</h2>
+              <p className="text-gray-600 mb-3">{userData.username}</p>
+              <p className="text-gray-700 mb-6 max-w-sm">{userData.bio}</p>
               
               <button className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
                 Edit Profile
@@ -60,15 +95,15 @@ export default function Profile() {
             {/* Stats */}
             <div className="flex justify-around mt-8 pt-6 border-t border-gray-100">
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{user.stats.chats}</div>
+                <div className="text-2xl font-bold text-gray-900">{userData.stats.chats}</div>
                 <div className="text-sm text-gray-600">Chats</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{user.stats.messages}</div>
+                <div className="text-2xl font-bold text-gray-900">{userData.stats.messages}</div>
                 <div className="text-sm text-gray-600">Messages</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{user.stats.likes}</div>
+                <div className="text-2xl font-bold text-gray-900">{userData.stats.likes}</div>
                 <div className="text-sm text-gray-600">Likes</div>
               </div>
             </div>
@@ -95,7 +130,10 @@ export default function Profile() {
 
           {/* Sign Out Button */}
           <div className="mt-8">
-            <button className="w-full flex items-center justify-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors">
+            <button 
+              onClick={logout}
+              className="w-full flex items-center justify-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors"
+            >
               <LogoutRoundedIcon sx={{ fontSize: 20 }} />
               <span className="font-medium">Sign Out</span>
             </button>

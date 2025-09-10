@@ -2,8 +2,17 @@
 
 import React, { useState } from 'react';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function Search() {
+  return (
+    <ProtectedRoute>
+      <SearchContent />
+    </ProtectedRoute>
+  );
+}
+
+function SearchContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 

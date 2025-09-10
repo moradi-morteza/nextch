@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { usePathname } from 'next/navigation';
 import { Geist, Geist_Mono } from "next/font/google";
-import BottomBar from '@/components/BottomBar';
-import RightBar from '@/components/RightBar';
+import { AuthProvider } from '@/contexts/AuthContext';
+import LayoutContent from '@/components/LayoutContent';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,9 +17,6 @@ const geistMono = Geist_Mono({
 });
 
 export default function RootLayout({ children }) {
-  const pathname = usePathname();
-  const hideNavigation = pathname?.startsWith('/chat');
-
   return (
     <html lang="en">
       <head>
@@ -36,17 +32,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="min-h-screen bg-gray-50">
-          <div className={hideNavigation ? '' : 'pb-16 md:pb-0 md:pr-24'}>
+        <AuthProvider>
+          <LayoutContent>
             {children}
-          </div>
-          {!hideNavigation && (
-            <>
-              <BottomBar />
-              <RightBar />
-            </>
-          )}
-        </main>
+          </LayoutContent>
+        </AuthProvider>
       </body>
     </html>
   );

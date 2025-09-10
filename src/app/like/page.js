@@ -2,8 +2,17 @@
 
 import React, { useState } from 'react';
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function Like() {
+  return (
+    <ProtectedRoute>
+      <LikeContent />
+    </ProtectedRoute>
+  );
+}
+
+function LikeContent() {
   const [activities] = useState([]);
 
   const getActivityIcon = (type) => {
