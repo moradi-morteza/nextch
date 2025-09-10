@@ -6,6 +6,7 @@ import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 import PhotoLibraryRoundedIcon from "@mui/icons-material/PhotoLibraryRounded";
 import ImageRoundedIcon from "@mui/icons-material/ImageRounded";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
+import { useLang } from "../../../hooks/useLang.js";
 
 export default function AttachBottomSheet({ 
   open, 
@@ -16,10 +17,11 @@ export default function AttachBottomSheet({
   isMobile,
   hasCamera 
 }) {
+  const { t } = useLang();
   const options = [
     ...(isMobile && hasCamera ? [{
       id: 'camera',
-      label: 'دوربین',
+      label: t('chat.composer.camera'),
       icon: <PhotoCameraRoundedIcon sx={{ fontSize: 32 }} />,
       action: onCameraCapture,
       accept: 'image/*',
@@ -28,7 +30,7 @@ export default function AttachBottomSheet({
     }] : []),
     {
       id: 'images',
-      label: isMobile ? 'گالری' : 'تصاویر',
+      label: isMobile ? t('chat.composer.gallery') : t('chat.composer.images'),
       icon: isMobile ? <PhotoLibraryRoundedIcon sx={{ fontSize: 32 }} /> : <ImageRoundedIcon sx={{ fontSize: 32 }} />,
       action: onPickImages,
       accept: 'image/*',
@@ -37,7 +39,7 @@ export default function AttachBottomSheet({
     },
     {
       id: 'file',
-      label: 'فایل',
+      label: t('chat.composer.file'),
       icon: <InsertDriveFileRoundedIcon sx={{ fontSize: 32 }} />,
       action: onPickFile,
       accept: '*/*',

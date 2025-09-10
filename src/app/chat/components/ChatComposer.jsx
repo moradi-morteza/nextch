@@ -19,8 +19,10 @@ import VoiceRecorder from "./VoiceRecorder.jsx";
 import VideoRecorder from "./VideoRecorder.jsx";
 import AttachBottomSheet from "./AttachBottomSheet.jsx";
 import RecordBottomSheet from "./RecordBottomSheet.jsx";
+import { useLang } from "../../../hooks/useLang.js";
 
 export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMessage, onSendImage, onSendImages, onSendFile, maxUploadMB = 5, showCommands = false }) {
+  const { t } = useLang();
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [cancelSlide, setCancelSlide] = useState(false);
@@ -337,13 +339,13 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 dir="rtl"
                 rows={2}
                 className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none rounded-lg"
-                placeholder="کپشن اختیاری"
+                placeholder={t('chat.composer.captionPlaceholder')}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
               />
               <div className="mt-2 flex gap-2 justify-end">
-                <IconButton onClick={cancelFile} size="small">لغو</IconButton>
-                <IconButton onClick={sendFile} color="primary" size="small">ارسال</IconButton>
+                <IconButton onClick={cancelFile} size="small">{t('action.cancel')}</IconButton>
+                <IconButton onClick={sendFile} color="primary" size="small">{t('action.send')}</IconButton>
               </div>
             </div>
           </div>
@@ -367,7 +369,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 dir="rtl"
                 rows={2}
                 className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none rounded-lg"
-                placeholder="کپشن اختیاری"
+                placeholder={t('chat.composer.captionPlaceholder')}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
               />
@@ -385,22 +387,22 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 dir="rtl"
                 rows={2}
                 className="w-full bg-transparent outline-none text-[15px] text-right placeholder:text-gray-400 p-2 resize-none rounded-lg"
-                placeholder="کپشن اختیاری"
+                placeholder={t('chat.composer.captionPlaceholder')}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
               />
               <div className="mt-2 flex gap-2 justify-end">
-                <IconButton onClick={cancelImage} aria-label="Cancel" size="small">لغو</IconButton>
-                <IconButton onClick={sendImage} aria-label="Send image" color="primary" size="small">ارسال</IconButton>
+                <IconButton onClick={cancelImage} aria-label={t('aria.cancel')} size="small">{t('action.cancel')}</IconButton>
+                <IconButton onClick={sendImage} aria-label={t('aria.sendImage')} color="primary" size="small">{t('action.send')}</IconButton>
               </div>
             </div>
           </div>
         ) : (
           <div className={styles.row}>
             {text.trim().length === 0 && (
-              <Tooltip title="Attach file">
+              <Tooltip title={t('chat.composer.attachTooltip')}>
                 <IconButton
-                  aria-label="Attach"
+                  aria-label={t('aria.attach')}
                   size="medium"
                   onClick={() => setShowAttachSheet(true)}
                   sx={{ p: 0.4 }}
@@ -415,7 +417,7 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
               dir="rtl"
               rows={1}
               className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-right placeholder:text-gray-400 px-2 resize-none leading-6 self-center"
-              placeholder="اینجا بنویسید ..."
+              placeholder={t('chat.composer.placeholder')}
               value={text}
               onChange={(e) => { setText(e.target.value); }}
               onKeyDown={onKeyDown}
@@ -426,9 +428,9 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
               }}
             />
             {text.trim().length > 0 ? (
-              <Tooltip title="Send">
+              <Tooltip title={t('chat.composer.sendTooltip')}>
                 <IconButton
-                  aria-label="Send"
+                  aria-label={t('aria.send')}
                   color="primary"
                   onClick={handleSend}
                   size="medium"
@@ -439,9 +441,9 @@ export default function ChatComposer({ onSendMessage, onVoiceMessage, onVideoMes
                 </IconButton>
               </Tooltip>
             ) : (
-              <Tooltip title="Record voice or video">
+              <Tooltip title={t('chat.composer.recordTooltip')}>
                 <IconButton
-                  aria-label="Record"
+                  aria-label={t('aria.record')}
                   onClick={() => setShowRecordSheet(true)}
                   size="medium"
                   sx={{ p: 0.5 }}

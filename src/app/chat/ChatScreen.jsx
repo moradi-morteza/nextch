@@ -12,10 +12,12 @@ import { MAX_UPLOAD_MB } from "./config.js";
 import IconButton from "@mui/material/IconButton";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { useLang } from "../../hooks/useLang.js";
 
 export default function ChatScreen() {
+  const { t } = useLang();
   const [messages, setMessages] = useState([
-    makeSystem({ text: "Today" }),
+    makeSystem({ text: t('chat.today') }),
     makeText({ text: "سلام وقت بخیر، من می‌خواستم بدونم برای کاهش وزن چه رژیمی بهتره؟" }),
     makeText({ text: "آیا لازمه حتما نان و برنج رو کامل حذف کنم؟ من بعضی وقتا خیلی هوس شیرینی می‌کنم، باید کلا قطعش کنم؟" }),
     makeText({ text: "فعالیت بدنی من کمه، این موضوع چقدر توی رژیم اثر داره؟" }),
@@ -171,7 +173,7 @@ export default function ChatScreen() {
               <IconButton onClick={handleCancelSelection} size="small" sx={{ color: '#666' }}>
                 <CloseRoundedIcon />
               </IconButton>
-              <span className="text-sm font-medium text-gray-800">{selectedMessages.length} انتخاب شده</span>
+              <span className="text-sm font-medium text-gray-800">{selectedMessages.length} {t('chat.selectedMessages')}</span>
             </div>
             <IconButton onClick={handleDeleteSelected} size="small" sx={{ color: '#ef4444' }}>
               <DeleteRoundedIcon />

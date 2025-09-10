@@ -7,6 +7,7 @@ import { authAPI } from '@/utils/api';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SendIcon from '@mui/icons-material/Send';
+import { useLang } from '@/hooks/useLang.js';
 
 export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -14,6 +15,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { t } = useLang();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -24,14 +26,14 @@ export default function Login() {
   const formatPhoneNumber = (value) => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
-    
+
     // Limit to 11 digits (0 + 10 digits)
     if (digits.length > 11) return phoneNumber;
-    
+
     // Always start with 0 for display
     if (digits.length === 0) return '';
     if (digits[0] !== '0') return '0' + digits.slice(0, 10);
-    
+
     return digits;
   };
 
@@ -42,9 +44,9 @@ export default function Login() {
 
   const handlePhoneSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validatePhoneNumber(phoneNumber)) {
-      setError('Please enter a valid phone number (09XXXXXXXXX)');
+      setError(t('auth.phoneValidationError'));
       return;
     }
 
@@ -58,8 +60,8 @@ export default function Login() {
     } catch (err) {
       console.error('Error requesting OTP:', err);
       setError(
-        err.response?.data?.message || 
-        'Failed to send OTP. Please try again.'
+        err.response?.data?.message ||
+        t('auth.otpSendError')
       );
     } finally {
       setLoading(false);
@@ -85,7 +87,7 @@ export default function Login() {
         >
           <ArrowBackIcon />
         </button>
-        <h1 className="text-xl font-semibold">Login</h1>
+        <h1 className="text-xl font-semibold">{t('auth.login')}</h1>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4">
@@ -94,19 +96,19 @@ export default function Login() {
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <PhoneIcon sx={{ fontSize: 40, color: '#2563eb' }} />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Enter Your Phone Number</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('auth.enterPhoneTitle')}</h2>
             <p className="text-gray-600">
-              We'll send you a verification code to confirm your number
+              {t('auth.verificationMessage')}
             </p>
           </div>
 
           <form onSubmit={handlePhoneSubmit} className="space-y-6">
             <div>
-              <label 
-                htmlFor="phone" 
+              <label
+                htmlFor="phone"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Phone Number
+                {t('auth.phoneNumberLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -122,9 +124,6 @@ export default function Login() {
                   disabled={loading}
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500">
-                Format: 09XXXXXXXXX (11 digits)
-              </p>
             </div>
 
             {error && (
@@ -144,13 +143,13 @@ export default function Login() {
                 <SendIcon sx={{ fontSize: 20 }} />
               )}
               <span className="text-lg font-medium">
-                {loading ? 'Sending...' : 'Send OTP'}
+                {loading ? t('auth.sendingOtp') : t('auth.sendOtp')}
               </span>
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-500">
-            By continuing, you agree to our Terms of Service and Privacy Policy
+            {t('auth.termsAndPrivacy')}
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 import { getMediaUrl } from "../../../utils/mediaStorage";
 import mediaManager from "../../../utils/mediaManager";
+import { useLang } from "../../../hooks/useLang.js";
 
 export default function AudioMessage({ url, mediaId, duration, variant = 'me', timestamp }) {
   const containerRef = useRef(null);
@@ -17,6 +18,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
   const [audioUrl, setAudioUrl] = useState(url);
   const [loading, setLoading] = useState(!!mediaId && !url);
   const audioUrlRef = useRef(null);
+  const { t } = useLang();
   const uniqueMediaId = useRef(`audio-${Date.now()}-${Math.random()}`).current;
   
   const colorFor = (v, isPlaying) =>
@@ -175,7 +177,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
           <button
             disabled
             className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-400 transition-colors"
-            aria-label="Loading"
+            aria-label={t('aria.loading')}
           >
             <PlayArrowRoundedIcon sx={{ fontSize: 32, color: 'white' }} />
           </button>
@@ -200,7 +202,7 @@ export default function AudioMessage({ url, mediaId, duration, variant = 'me', t
           onClick={toggle}
           disabled={!ready}
           className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-gray-400 transition-colors"
-          aria-label={playing ? "Pause" : "Play"}
+          aria-label={playing ? t('aria.pause') : t('aria.play')}
         >
           {playing ? (
             <PauseRoundedIcon sx={{ fontSize: 30, color: 'white' }} />

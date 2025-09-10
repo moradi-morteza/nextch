@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Drawer, Box, Typography } from "@mui/material";
 import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
 import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
+import { useLang } from "../../../hooks/useLang.js";
 
 export default function RecordBottomSheet({ 
   open, 
@@ -11,17 +12,18 @@ export default function RecordBottomSheet({
   onVoiceRecord,
   onVideoRecord
 }) {
+  const { t } = useLang();
   const options = [
     {
       id: 'voice',
-      label: 'صوت',
+      label: t('chat.composer.audio'),
       icon: <MicNoneRoundedIcon sx={{ fontSize: 32 }} />,
       action: onVoiceRecord,
       color: '#10b981' // green
     },
     {
       id: 'video',
-      label: 'ویدیو',
+      label: t('chat.composer.video'),
       icon: <VideocamRoundedIcon sx={{ fontSize: 32 }} />,
       action: onVideoRecord,
       color: '#f59e0b' // amber

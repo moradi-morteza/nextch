@@ -7,6 +7,7 @@ import { authAPI } from '@/utils/api';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SecurityIcon from '@mui/icons-material/Security';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { useLang } from '@/hooks/useLang.js';
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState(['', '', '', '', '']);
@@ -19,6 +20,7 @@ export default function VerifyOtp() {
   const { login, isAuthenticated } = useAuth();
   const inputRefs = useRef([]);
   const phoneNumber = searchParams.get('phone');
+  const { t } = useLang();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -189,7 +191,7 @@ export default function VerifyOtp() {
                   ) : (
                     <RefreshIcon sx={{ fontSize: 16 }} />
                   )}
-                  {resendLoading ? 'Sending...' : 'Resend Code'}
+                  {resendLoading ? t('auth.resendCodeSending') : t('auth.resendCode')}
                 </button>
               )}
             </div>
