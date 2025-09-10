@@ -93,17 +93,11 @@ export default function MessageItem({ message, selectionMode = false, isSelected
     }
   };
 
-  const isUnread = !message.is_read && !isMe && !isSystem;
-
   return (
     <li 
-      className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"} ${isNewMessage ? 'animate-slide-in' : 'animate-fade-in'} ${isUnread ? 'relative' : ''}`}
+      className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"} ${isNewMessage ? 'animate-slide-in' : 'animate-fade-in'}`}
       style={{ animationDelay: isNewMessage ? '0ms' : `${(totalMessages - messageIndex - 1) * 50}ms` }}
     >
-      {/* Unread indicator */}
-      {isUnread && (
-        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full z-10"></div>
-      )}
       {selectionMode && canSelect && (
         <div className="mr-2">
           <div 
