@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import MessageIcon from '@mui/icons-material/Message';
 import Avatar from '@mui/material/Avatar';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -147,21 +146,6 @@ function UserProfileContent() {
 
   return (
     <div className="flex-1 flex flex-col bg-white relative">
-      {/* Header */}
-      <div className="tg-topbar flex items-center px-3 py-2 sticky top-0 z-40 bg-white border-b border-gray-100" dir="rtl">
-        <button
-          onClick={() => router.back()}
-          className="ml-3 p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <KeyboardArrowLeftIcon className="text-gray-700" sx={{ fontSize: 20 }} />
-        </button>
-        <div className="flex-1 text-right">
-          <h1 className="text-lg font-bold text-black truncate">
-            {user.full_name || user.username}
-          </h1>
-        </div>
-      </div>
-
       {/* Profile Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="w-full max-w-2xl mx-auto">

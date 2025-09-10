@@ -13,13 +13,13 @@ import { MAX_UPLOAD_MB } from "./config.js";
 import IconButton from "@mui/material/IconButton";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { useLang } from "../../hooks/useLang.js";
+import { useLang } from "@/hooks/useLang";
 
 export default function ChatScreen() {
   const searchParams = useSearchParams();
   const targetUserId = searchParams.get('user');
   const userDataParam = searchParams.get('userData');
-  
+
   let targetUserData = null;
   if (userDataParam) {
     try {
@@ -28,7 +28,7 @@ export default function ChatScreen() {
       console.error('Error parsing user data:', error);
     }
   }
-  
+
   const { t } = useLang();
   const [messages, setMessages] = useState([
     makeSystem({ text: t('chat.today') }),
@@ -194,10 +194,10 @@ export default function ChatScreen() {
             </IconButton>
           </div>
         ) : (
-          <ChatHeader 
-            title={targetUserData?.name || "Morteza"} 
-            status={targetUserData?.name || "Morteza"} 
-            avatar={targetUserData?.name?.charAt(0)?.toUpperCase() || "M"} 
+          <ChatHeader
+            title={targetUserData?.name || "Morteza"}
+            status={targetUserData?.username || "Morteza"}
+            avatar={targetUserData?.name?.charAt(0)?.toUpperCase() || "M"}
             showBackButton={!!targetUserId}
             avatarUrl={targetUserData?.avatar}
           />
