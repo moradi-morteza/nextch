@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from 'next/navigation';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import ChatHeader from "./components/ChatHeader.jsx";
@@ -15,6 +16,19 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { useLang } from "../../hooks/useLang.js";
 
 export default function ChatScreen() {
+  const searchParams = useSearchParams();
+  const targetUserId = searchParams.get('user');
+  const userDataParam = searchParams.get('userData');
+  
+  let targetUserData = null;
+  if (userDataParam) {
+    try {
+      targetUserData = JSON.parse(decodeURIComponent(userDataParam));
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
+  }
+  
   const { t } = useLang();
   const [messages, setMessages] = useState([
     makeSystem({ text: t('chat.today') }),
@@ -180,7 +194,13 @@ export default function ChatScreen() {
             </IconButton>
           </div>
         ) : (
-          <ChatHeader title="Morteza" status="online" avatar="M" />
+          <ChatHeader 
+            title={targetUserData?.name || "Morteza"} 
+            status={targetUserData?.name || "Morteza"} 
+            avatar={targetUserData?.name?.charAt(0)?.toUpperCase() || "M"} 
+            showBackButton={!!targetUserId}
+            avatarUrl={targetUserData?.avatar}
+          />
         )}
 
         <ChatBackground scrollRef={listRef}>

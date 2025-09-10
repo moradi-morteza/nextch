@@ -1,12 +1,21 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const BottomBar = () => {
     const pathname = usePathname();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return null;
+    }
     
     const tabs = [
         { icon: '/icons/feed.svg', activeIcon: '/icons/feed_enable.svg', path: '/' },

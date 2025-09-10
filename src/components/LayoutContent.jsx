@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import BottomBar from '@/components/BottomBar';
@@ -9,6 +9,22 @@ import RightBar from '@/components/RightBar';
 export default function LayoutContent({ children }) {
   const pathname = usePathname();
   const { isAuthenticated, loading } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // If not mounted yet, render with basic layout to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <div>
+          {children}
+        </div>
+      </main>
+    );
+  }
   
   // Hide navigation for chat pages or if user is not authenticated
   const hideNavigation = pathname?.startsWith('/chat') || !isAuthenticated;

@@ -47,10 +47,6 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="tg-topbar flex items-center justify-between px-4 py-3 sticky top-0 z-40">
-        <h1 className="text-xl font-semibold">{t('page.home.feed')}</h1>
-      </div>
-
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">

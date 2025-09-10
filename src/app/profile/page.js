@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
-import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import Avatar from '@mui/material/Avatar';
+import CircularProgress from '@mui/material/CircularProgress';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import api from '@/utils/api';
 
 export default function Profile() {
   return (
@@ -22,120 +22,150 @@ export default function Profile() {
 
 function ProfileContent() {
   const { user: authUser, logout } = useAuth();
-  
-  const getUserDisplayName = () => {
-    if (authUser?.first_name || authUser?.last_name) {
-      return `${authUser.first_name || ''} ${authUser.last_name || ''}`.trim();
+  const router = useRouter();
+  const [userProfile, setUserProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get('/user/profile');
+      if (response.data.success) {
+        setUserProfile(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    } finally {
+      setIsLoading(false);
     }
-    if (authUser?.username) {
-      return authUser.username;
-    }
-    if (authUser?.phone) {
-      return authUser.phone;
-    }
-    return 'User';
   };
 
-  const getUserDisplayUsername = () => {
-    if (authUser?.username) {
-      return `@${authUser.username}`;
-    }
-    if (authUser?.phone) {
-      return `@${authUser.phone.slice(-4)}`;
-    }
-    return '@user';
+  const handleFollowersClick = () => {
+    router.push(`/user/${userProfile.id}/followers`);
   };
-  
-  const [userData] = useState({
-    name: getUserDisplayName(),
-    username: getUserDisplayUsername(),
-    bio: 'Welcome to NextChat',
-    avatar: '/default-avatar.png',
-    stats: {
-      chats: 0,
-      messages: 0,
-      likes: 0
-    }
-  });
 
-  const [menuItems] = useState([
-    { icon: 'settings', label: 'Settings', href: '/settings' },
-    { icon: 'history', label: 'Chat History', href: '/history' },
-    { icon: 'help', label: 'Help & Support', href: '/help' },
-    { icon: 'info', label: 'About', href: '/about' }
-  ]);
+  const handleFollowingClick = () => {
+    router.push(`/user/${userProfile.id}/following`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 overflow-y-auto">
+          <div className="w-full max-w-2xl mx-auto p-4">
+            <div className="flex items-center justify-between mb-4" dir="rtl">
+              <div className="flex items-center flex-1 min-w-0">
+                <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse flex-shrink-0"></div>
+                <div className="flex-1 min-w-0 mr-3">
+                  <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
+                  <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+              <div className="w-20 h-6 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+            <div className="flex items-center gap-6 mb-4" dir="rtl">
+              <div className="flex items-center gap-1">
+                <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-8 h-3 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-8 h-3 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex-1 flex flex-col">
-      <div className="tg-topbar flex items-center justify-between px-4 py-3 sticky top-0 z-40">
-        <h1 className="text-xl font-semibold">Profile</h1>
-        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <MoreVertRoundedIcon sx={{ fontSize: 24 }} />
-        </button>
-      </div>
-      
-      <div className="flex-1 p-4">
-        <div className="w-full max-w-2xl mx-auto">
+    <div className="flex-1 flex flex-col bg-white">
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-full max-w-2xl mx-auto p-4">
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-                <PersonRoundedIcon sx={{ fontSize: 48, color: 'white' }} />
+          <div className="flex items-center justify-between mb-4" dir="rtl">
+            <div className="flex items-center flex-1 min-w-0">
+              <Avatar 
+                src={userProfile?.avatar_url} 
+                alt={userProfile?.full_name}
+                className="w-12 h-12 flex-shrink-0"
+                sx={{ width: 48, height: 48 }}
+              >
+                {userProfile?.full_name?.charAt(0)?.toUpperCase() || userProfile?.username?.charAt(0)?.toUpperCase()}
+              </Avatar>
+              
+              <div className="flex-1 min-w-0 mr-3">
+                <h2 className="text-base font-semibold text-gray-900 truncate text-right">
+                  {userProfile?.full_name || userProfile?.username || 'کاربر'}
+                </h2>
+                {userProfile?.username && userProfile?.full_name && (
+                  <p className="text-gray-500 text-xs truncate text-right">@{userProfile.username}</p>
+                )}
               </div>
-              
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">{userData.name}</h2>
-              <p className="text-gray-600 mb-3">{userData.username}</p>
-              <p className="text-gray-700 mb-6 max-w-sm">{userData.bio}</p>
-              
-              <button className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                Edit Profile
-              </button>
             </div>
 
-            {/* Stats */}
-            <div className="flex justify-around mt-8 pt-6 border-t border-gray-100">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userData.stats.chats}</div>
-                <div className="text-sm text-gray-600">Chats</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userData.stats.messages}</div>
-                <div className="text-sm text-gray-600">Messages</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userData.stats.likes}</div>
-                <div className="text-sm text-gray-600">Likes</div>
-              </div>
-            </div>
+            <button className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-medium transition-colors flex-shrink-0 mr-3">
+              ویرایش پروفایل
+            </button>
           </div>
+
+          {/* Bio */}
+          {userProfile?.bio && (
+            <div className="mb-4">
+              <p className="text-gray-700 text-xs leading-relaxed text-right">{userProfile.bio}</p>
+            </div>
+          )}
+
+          {/* Stats */}
+          <div className="flex items-center gap-6 mb-4" dir="rtl">
+            <button
+              onClick={handleFollowersClick}
+              className="flex items-center gap-1 hover:bg-gray-50 rounded px-2 py-1 transition-colors"
+            >
+              <span className="text-gray-500 text-xs">دنبال‌کننده</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {userProfile?.followers_count || 0}
+              </span>
+            </button>
+
+            <button
+              onClick={handleFollowingClick}
+              className="flex items-center gap-1 hover:bg-gray-50 rounded px-2 py-1 transition-colors"
+            >
+              <span className="text-gray-500 text-xs">دنبال شده</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {userProfile?.following_count || 0}
+              </span>
+            </button>
+          </div>
+
+          {/* Join Date */}
+          {userProfile?.created_at && (
+            <div className="text-gray-400 text-xs text-right mb-6">
+              عضو از {new Date(userProfile.created_at).toLocaleDateString('fa-IR', { 
+                year: 'numeric', 
+                month: 'long' 
+              })}
+            </div>
+          )}
 
           {/* Menu Items */}
-          <div className="space-y-2">
-            {menuItems.map((item, index) => (
-              <button
-                key={index}
-                className="w-full flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 text-left"
-              >
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                  {item.icon === 'settings' && <SettingsRoundedIcon sx={{ fontSize: 20, color: 'gray.600' }} />}
-                  {item.icon === 'history' && <HistoryRoundedIcon sx={{ fontSize: 20, color: 'gray.600' }} />}
-                  {item.icon === 'help' && <HelpOutlineRoundedIcon sx={{ fontSize: 20, color: 'gray.600' }} />}
-                  {item.icon === 'info' && <InfoOutlinedIcon sx={{ fontSize: 20, color: 'gray.600' }} />}
-                </div>
-                <span className="flex-1 text-gray-900 font-medium">{item.label}</span>
-                <ChevronRightRoundedIcon sx={{ fontSize: 20 }} className="text-gray-400" />
-              </button>
-            ))}
-          </div>
-
-          {/* Sign Out Button */}
-          <div className="mt-8">
+          <div className="space-y-1">
+            <button className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-right">
+              <SettingsRoundedIcon sx={{ fontSize: 16 }} className="text-gray-600" />
+              <span className="flex-1 text-gray-900 text-sm font-medium text-right">تنظیمات</span>
+            </button>
+            
             <button 
               onClick={logout}
-              className="w-full flex items-center justify-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors"
+              className="w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 transition-colors text-right"
             >
-              <LogoutRoundedIcon sx={{ fontSize: 20 }} />
-              <span className="font-medium">Sign Out</span>
+              <LogoutRoundedIcon sx={{ fontSize: 16 }} />
+              <span className="flex-1 text-sm font-medium text-right">خروج</span>
             </button>
           </div>
         </div>

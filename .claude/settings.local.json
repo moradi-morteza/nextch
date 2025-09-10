@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm install:*)",
       "Read(//mnt/c/Users/morteza/Desktop/askif/**)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Read(//mnt/c/laragon/www/nextch_backend/**)",
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan make:controller:*)",
+      "Bash(php artisan:*)"
     ],
     "deny": [],
     "ask": []

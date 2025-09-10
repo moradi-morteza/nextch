@@ -215,16 +215,9 @@ export default function VideoMessage({ url, mediaId, width, height, duration, va
 
       {/* Loading state - clean and elegant */}
       {(loading || !videoLoaded) && !loadError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
-          <CircularProgress
-            size={40}
-            thickness={3}
-            sx={{
-              color: 'white',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }}
-          />
-          <span className="text-white text-sm mt-2 font-medium bg-black/30 px-2 py-1 rounded" dir="rtl">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 animate-pulse">
+          <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse mb-2"></div>
+          <span className="text-gray-500 text-sm font-medium bg-gray-300 animate-pulse px-3 py-1 rounded" dir="rtl">
             در حال بارگذاری...
           </span>
         </div>
