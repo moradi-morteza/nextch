@@ -210,6 +210,26 @@ function UserProfileContent() {
                   {user.following_count || 0}
                 </span>
               </button>
+
+              {/* Rating */}
+              {user.average_rating > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-500 text-xs">⭐</span>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {user.average_rating}
+                  </span>
+                </div>
+              )}
+
+              {/* Closed conversations count */}
+              {user.closed_conversations_count > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-500 text-xs">💬</span>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {user.closed_conversations_count}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Join Date */}
