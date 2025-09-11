@@ -13,33 +13,37 @@ const UserListItem = ({
 }) => {
   return (
     <div 
-      className={`flex items-center py-2 px-4 cursor-pointer ${className}`}
-      onClick={() => onUserClick(user.id)}
+      className={`flex items-center py-2 px-4 ${className}`}
       dir="rtl"
     >
-      <Avatar 
-        src={user.avatar_url} 
-        alt={user.full_name}
-        className="w-11 h-11 flex-shrink-0"
-        sx={{ width: 44, height: 44 }}
+      <div 
+        className="flex items-center flex-1 min-w-0 cursor-pointer transition-all duration-150 transform active:scale-95 active:bg-gray-50 rounded-lg p-2 -m-2"
+        onClick={() => onUserClick(user.id)}
       >
-        {user.full_name?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase()}
-      </Avatar>
-      
-      <div className="flex-1 min-w-0 mr-3">
-        <div className="font-medium text-gray-900 text-sm truncate text-right">
-          {user.full_name || user.username}
+        <Avatar 
+          src={user.avatar_url} 
+          alt={user.full_name}
+          className="w-11 h-11 flex-shrink-0"
+          sx={{ width: 44, height: 44 }}
+        >
+          {user.full_name?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase()}
+        </Avatar>
+        
+        <div className="flex-1 min-w-0 mr-3">
+          <div className="font-medium text-gray-900 text-sm truncate text-right">
+            {user.full_name || user.username}
+          </div>
+          {user.username && user.full_name && (
+            <div className="text-gray-500 text-xs truncate text-right">
+              @{user.username}
+            </div>
+          )}
+          {user.bio && (
+            <div className="text-gray-600 text-xs truncate mt-0.5 text-right">
+              {user.bio}
+            </div>
+          )}
         </div>
-        {user.username && user.full_name && (
-          <div className="text-gray-500 text-xs truncate text-right">
-            @{user.username}
-          </div>
-        )}
-        {user.bio && (
-          <div className="text-gray-600 text-xs truncate mt-0.5 text-right">
-            {user.bio}
-          </div>
-        )}
       </div>
 
       {showFollowButton && (

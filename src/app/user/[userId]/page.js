@@ -193,7 +193,7 @@ function UserProfileContent() {
             <div className="flex items-center gap-6 mb-4" dir="rtl">
               <button
                 onClick={handleFollowersClick}
-                className="flex items-center gap-1 hover:bg-gray-50 rounded px-2 py-1 transition-colors"
+                className="flex items-center gap-1 hover:bg-gray-50 rounded px-2 py-1 transition-all duration-150 transform active:scale-95"
               >
                 <span className="text-gray-500 text-xs">دنبال‌کننده</span>
                 <span className="text-sm font-semibold text-gray-900">
@@ -203,7 +203,7 @@ function UserProfileContent() {
 
               <button
                 onClick={handleFollowingClick}
-                className="flex items-center gap-1 hover:bg-gray-50 rounded px-2 py-1 transition-colors"
+                className="flex items-center gap-1 hover:bg-gray-50 rounded px-2 py-1 transition-all duration-150 transform active:scale-95"
               >
                 <span className="text-gray-500 text-xs">دنبال شده</span>
                 <span className="text-sm font-semibold text-gray-900">
