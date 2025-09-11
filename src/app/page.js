@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import ChatBubbleRoundedIcon from '@mui/icons-material/ChatBubbleRounded';
 import LoginIcon from '@mui/icons-material/Login';
 import { useLang } from '@/hooks/useLang.js';
 
@@ -48,22 +47,11 @@ export default function Home() {
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">{t('page.home.welcomeBack')}</h2>
-          </div>
-
-          <Link
-            href="/chat"
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 hover:shadow-lg active:scale-95"
-          >
-            <ChatBubbleRoundedIcon sx={{ fontSize: 24 }} />
-            <span className="text-lg font-medium">{t('page.home.startChat')}</span>
-          </Link>
-
-          <div className="mt-6 text-center text-sm text-gray-500">
-            {t('page.home.tapToChat')}
-          </div>
+        <div className="w-full max-w-md text-center">
+          <h2 className="text-2xl font-bold mb-4">{t('page.home.welcomeBack')}</h2>
+          <p className="text-gray-600 text-lg">
+            برای شروع گفتگو با یک کاربر، به پروفایل او رفته و روی دکمه چت کلیک کنید.
+          </p>
         </div>
       </div>
     </div>

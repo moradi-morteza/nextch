@@ -1,9 +1,19 @@
 import { useLang } from '../../../hooks/useLang.js';
 import { useRouter } from 'next/navigation';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import SendIcon from '@mui/icons-material/Send';
 import Avatar from '@mui/material/Avatar';
 
-export default function ChatHeader({ title = "Morteza", status = "online", avatar = "M", showBackButton = false, avatarUrl = null }) {
+export default function ChatHeader({ 
+  title = "Morteza", 
+  status = "online", 
+  avatar = "M", 
+  showBackButton = false, 
+  avatarUrl = null, 
+  showSendButton = false, 
+  onSendConversation = null,
+  sendingConversation = false 
+}) {
   const router = useRouter();
   const { t } = useLang();
   
@@ -40,6 +50,26 @@ export default function ChatHeader({ title = "Morteza", status = "online", avata
           <div className="font-medium text-gray-900 text-sm">{title}</div>
           <div className="text-xs text-gray-500">{getStatusText(status)}</div>
         </div>
+        
+        {showSendButton && (
+          <button
+            onClick={onSendConversation}
+            disabled={sendingConversation}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors"
+          >
+            {sendingConversation ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>ارسال...</span>
+              </>
+            ) : (
+              <>
+                <SendIcon sx={{ fontSize: 16 }} />
+                <span>ارسال</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </header>
   );

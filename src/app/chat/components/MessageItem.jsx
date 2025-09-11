@@ -95,8 +95,7 @@ export default function MessageItem({ message, selectionMode = false, isSelected
 
   return (
     <li 
-      className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"} ${isNewMessage ? 'animate-slide-in' : 'animate-fade-in'}`}
-      style={{ animationDelay: isNewMessage ? '0ms' : `${(totalMessages - messageIndex - 1) * 50}ms` }}
+      className={`flex items-center ${isSystem ? 'justify-center' : isMe ? "justify-end" : "justify-start"} ${isNewMessage ? 'animate-slide-in' : ''}`}
     >
       {selectionMode && canSelect && (
         <div className="mr-2">

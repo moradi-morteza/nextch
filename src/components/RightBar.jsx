@@ -11,6 +11,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PersonIcon from '@mui/icons-material/Person';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 const RightBar = () => {
     const pathname = usePathname();
@@ -25,6 +26,11 @@ const RightBar = () => {
             icon: <SearchOutlinedIcon sx={{ fontSize: 28 }} />, 
             activeIcon: <SearchIcon sx={{ fontSize: 28 }} />, 
             path: '/search' 
+        },
+        { 
+            icon: <HelpOutlineIcon sx={{ fontSize: 28 }} />, 
+            activeIcon: <HelpOutlineIcon sx={{ fontSize: 28 }} />, 
+            path: '/conversations' 
         },
         { 
             icon: <FavoriteBorderIcon sx={{ fontSize: 28 }} />, 
