@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSearchParams } from 'next/navigation';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -24,14 +24,16 @@ export default function ChatScreen() {
   const userDataParam = searchParams.get('userData');
   const conversationId = searchParams.get('conversationId');
 
-  let targetUserData = null;
-  if (userDataParam) {
+  // Memoize targetUserData to prevent re-creation on every render
+  const targetUserData = useMemo(() => {
+    if (!userDataParam) return null;
     try {
-      targetUserData = JSON.parse(decodeURIComponent(userDataParam));
+      return JSON.parse(decodeURIComponent(userDataParam));
     } catch (error) {
       console.error('Error parsing user data:', error);
+      return null;
     }
-  }
+  }, [userDataParam]);
 
   const { t } = useLang();
   const { user: currentUser } = useAuth();
@@ -44,27 +46,33 @@ export default function ChatScreen() {
   const [sendingConversation, setSendingConversation] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const listRef = useRef(null);
+  const apiCallMade = useRef(new Set()); // Track which conversations have been loaded
 
-  // Initialize conversation and load messages
-  useEffect(() => {
-    const initializeChat = async () => {
-      if (!currentUser || !targetUserId) {
-        setIsLoading(false);
-        return;
-      }
+  // Memoize the initialization function to prevent unnecessary re-runs
+  const initializeChat = useCallback(async () => {
+    if (!currentUser || !targetUserId) {
+      setIsLoading(false);
+      return;
+    }
 
-      // For new chats (no conversationId), we need targetUserData
-      if (!conversationId && !targetUserData) {
-        setIsLoading(false);
-        return;
-      }
+    // For new chats (no conversationId), we need targetUserData
+    if (!conversationId && !targetUserData) {
+      setIsLoading(false);
+      return;
+    }
 
-      // Prevent multiple simultaneous initializations
-      if (isInitializing) {
-        return;
-      }
+    // Create a unique key for this initialization to prevent duplicates
+    const currentInitKey = `${currentUser?.id}-${targetUserId}-${conversationId || 'new'}`;
+    
+    // Prevent multiple simultaneous initializations
+    if (isInitializing) {
+      console.log('Skipping initialization - already in progress');
+      return;
+    }
 
-      setIsInitializing(true);
+    console.log('Starting initialization for key:', currentInitKey);
+    console.log('React.StrictMode double execution?', process.env.NODE_ENV === 'development');
+    setIsInitializing(true);
 
       try {
         await chatStorage.init();
@@ -107,27 +115,48 @@ export default function ChatScreen() {
         // If it's a non-draft conversation and we have limited local messages,
         // or if recipient is opening a pending conversation, fetch from server
         if (conversationId && (existingConversation.status !== 'draft' || existingMessages.length === 0)) {
-          try {
-            const response = await api.get(`/conversation/${conversationId}`);
-            const serverMessages = response.data.conversation.messages || [];
+          // Check if we've already made an API call for this conversation
+          if (apiCallMade.current.has(conversationId)) {
+            console.log('API call already made for conversation:', conversationId);
+          } else {
+            try {
+              console.log('Making API call for conversation:', conversationId);
+              apiCallMade.current.add(conversationId); // Mark as being processed BEFORE the call
+              
+              const response = await api.get(`/conversation/${conversationId}`);
+              const serverMessages = response.data.conversation.messages || [];
 
-            // Save server messages to local storage for offline access
-            for (const serverMsg of serverMessages) {
-              await chatStorage.saveMessage(serverMsg);
+              // Clear existing local messages for this conversation to avoid duplicates
+              const existingLocalIds = new Set(existingMessages.map(msg => msg.id));
+              
+              // Save only new server messages to local storage
+              for (const serverMsg of serverMessages) {
+                if (!existingLocalIds.has(serverMsg.id)) {
+                  await chatStorage.saveMessage(serverMsg);
+                }
+              }
+
+              // Use server messages as the source of truth
+              existingMessages = serverMessages;
+            } catch (error) {
+              console.error('Error loading messages from server:', error);
+              // Remove from set if API call failed so it can be retried
+              apiCallMade.current.delete(conversationId);
+              // Fall back to local messages if server fetch fails
             }
-
-            // Use server messages as the source of truth
-            existingMessages = serverMessages;
-          } catch (error) {
-            console.error('Error loading messages from server:', error);
-            // Fall back to local messages if server fetch fails
           }
         }
 
-        const formattedMessages = existingMessages.map(msg => makeText({
+        // Deduplicate messages by ID before formatting
+        const uniqueMessages = existingMessages.filter((msg, index, array) => 
+          array.findIndex(m => m.id === msg.id) === index
+        );
+
+        const formattedMessages = uniqueMessages.map(msg => makeText({
           text: msg.body,
           from: msg.sender_id === currentUser.id ? 'me' : 'them',
-          timestamp: new Date(msg.created_at).getTime()
+          timestamp: new Date(msg.created_at).getTime(),
+          id: msg.id // Keep original ID for reference
         }));
 
         // Add system messages based on conversation status
@@ -137,14 +166,23 @@ export default function ChatScreen() {
         setNewMessageIds(new Set());
       } catch (error) {
         console.error('Error initializing chat:', error);
-      } finally {
-        setIsLoading(false);
-        setIsInitializing(false);
-      }
-    };
+    } finally {
+      setIsLoading(false);
+      setIsInitializing(false);
+      console.log('Initialization completed for key:', currentInitKey);
+    }
+  }, [currentUser?.id, targetUserId, conversationId, targetUserData]);
 
+  // Initialize conversation and load messages
+  useEffect(() => {
     initializeChat();
-  }, [currentUser, targetUserId, conversationId]); // Removed targetUserData to prevent infinite loops
+    
+    // Cleanup function - only reset when navigating to different conversation
+    return () => {
+      // Don't reset the apiCallMade set - let it persist across re-renders
+      // Only clear if we're navigating to a completely different conversation
+    };
+  }, [initializeChat]);
 
   // Initial scroll to bottom on mount and content changes
   useEffect(() => {
@@ -461,6 +499,34 @@ export default function ChatScreen() {
       },
     },
   });
+
+  // Loading component with Persian text and fade animation
+  if (isLoading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <main className="h-[100dvh] w-full flex flex-col bg-white overflow-x-hidden">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center" dir="rtl">
+              <div className="animate-pulse">
+                <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="animate-fade-in-out">
+                    <p className="text-gray-600 text-base font-medium">در حال بارگذاری پیام‌ها...</p>
+                  </div>
+                  <div className="animate-fade-in-out-delay-1">
+                    <p className="text-gray-400 text-sm">لطفاً کمی صبر کنید</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
