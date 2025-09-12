@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import UserListItem from '@/components/UserListItem';
 import api from '@/utils/api';
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 export default function FollowersPage() {
   return (
@@ -19,7 +19,7 @@ function FollowersContent() {
   const params = useParams();
   const router = useRouter();
   const { userId } = params;
-  
+
   const [followers, setFollowers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -39,7 +39,7 @@ function FollowersContent() {
 
       if (response.data.success) {
         const newFollowers = response.data.data;
-        
+
         if (append) {
           setFollowers(prev => [...prev, ...newFollowers]);
         } else {
@@ -51,7 +51,7 @@ function FollowersContent() {
           states[user.id] = user.is_following;
         });
         setFollowingStates(prev => ({ ...prev, ...states }));
-        
+
         setHasMore(response.data.pagination.has_more);
         setPage(pageNum);
       }
@@ -73,7 +73,7 @@ function FollowersContent() {
   const handleFollowToggle = async (targetUserId, isCurrentlyFollowing) => {
     try {
       const endpoint = isCurrentlyFollowing ? 'unfollow' : 'follow';
-      
+
       await api.post(`/user/${targetUserId}/${endpoint}`);
 
       setFollowingStates(prev => ({
@@ -81,9 +81,9 @@ function FollowersContent() {
         [targetUserId]: !isCurrentlyFollowing
       }));
 
-      setFollowers(prev => 
-        prev.map(user => 
-          user.id === targetUserId 
+      setFollowers(prev =>
+        prev.map(user =>
+          user.id === targetUserId
             ? { ...user, is_following: !isCurrentlyFollowing }
             : user
         )
@@ -105,7 +105,7 @@ function FollowersContent() {
             onClick={() => router.back()}
             className="ml-3 p-1.5 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <KeyboardArrowLeftIcon className="text-gray-700" sx={{ fontSize: 20 }} />
+            <ArrowForwardIosIcon className="text-gray-700" sx={{ fontSize: 20 }} />
           </button>
           <h1 className="text-lg font-bold text-black">دنبال‌کنندگان</h1>
         </div>
@@ -137,7 +137,7 @@ function FollowersContent() {
           onClick={() => router.back()}
           className="ml-3 p-1.5 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <KeyboardArrowLeftIcon className="text-gray-700" sx={{ fontSize: 20 }} />
+          <ArrowForwardIosIcon className="text-gray-700" sx={{ fontSize: 20 }} />
         </button>
         <h1 className="text-lg font-bold text-black">دنبال‌کنندگان</h1>
       </div>

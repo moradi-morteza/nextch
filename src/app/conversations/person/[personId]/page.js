@@ -6,8 +6,8 @@ import api from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import ConversationListItem from '../../components/ConversationListItem';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Avatar from '@mui/material/Avatar';
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 export default function PersonConversationsPage({ params }) {
   const resolvedParams = use(params);
@@ -20,25 +20,25 @@ export default function PersonConversationsPage({ params }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get('type') || 'received';
-  
+
   useEffect(() => {
     fetchConversations(1);
   }, [resolvedParams.personId, type]);
 
   const fetchConversations = async (pageNum = 1) => {
     if (!user) return;
-    
+
     setLoading(pageNum === 1);
     try {
       const response = await api.get(`/conversations/person/${resolvedParams.personId}?type=${type}&page=${pageNum}`);
-      
+
       if (pageNum === 1) {
         setConversations(response.data.conversations.data);
         setPersonData(response.data.person);
       } else {
         setConversations(prev => [...prev, ...response.data.conversations.data]);
       }
-      
+
       setHasMore(response.data.conversations.current_page < response.data.conversations.last_page);
       setPage(pageNum);
     } catch (error) {
@@ -51,7 +51,7 @@ export default function PersonConversationsPage({ params }) {
   const handleConversationClick = (conversation) => {
     const userData = type === 'received' ? conversation.starter : conversation.recipient;
     const targetUserId = type === 'received' ? conversation.starter_id : conversation.recipient_id;
-    
+
     router.push(`/chat?user=${targetUserId}&userData=${encodeURIComponent(JSON.stringify(userData))}&conversationId=${conversation.id}`);
   };
 
@@ -61,28 +61,30 @@ export default function PersonConversationsPage({ params }) {
         <div className="flex-1 flex flex-col">
           <div className="bg-white border-b border-gray-100 p-4" dir="rtl">
             <div className="flex items-center">
+              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mr-3"></div>
               <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse flex-shrink-0"></div>
               <div className="mr-3 flex-1">
                 <div className="w-32 h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
                 <div className="w-24 h-3 bg-gray-200 rounded animate-pulse"></div>
               </div>
-              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mr-3"></div>
             </div>
           </div>
-          <div className="flex-1 bg-white" dir="rtl">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="border-b border-gray-100 px-4 py-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-                    <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+          <div className="flex-1" dir="rtl">
+            <div className="max-w-4xl mx-auto p-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+                      <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                    <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
                   </div>
-                  <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="w-24 h-3 bg-gray-200 rounded animate-pulse"></div>
                 </div>
-                <div className="w-full h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-                <div className="w-24 h-3 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </ProtectedRoute>
@@ -94,8 +96,15 @@ export default function PersonConversationsPage({ params }) {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-100 sticky top-0 z-10" dir="rtl">
-          <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="px-4 py-3">
             <div className="flex items-center">
+              <button
+                onClick={() => router.back()}
+                className="ml-3 p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+              >
+                <ArrowForwardIosIcon sx={{ fontSize: 20, color: '#374151' }} />
+              </button>
+
               {personData && (
                 <div className="flex items-center flex-1">
                   <Avatar
@@ -114,13 +123,6 @@ export default function PersonConversationsPage({ params }) {
                   </div>
                 </div>
               )}
-              
-              <button
-                onClick={() => router.back()}
-                className="mr-3 p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
-              >
-                <ArrowForwardIcon sx={{ fontSize: 20, color: '#374151' }} />
-              </button>
             </div>
           </div>
         </div>
@@ -139,7 +141,7 @@ export default function PersonConversationsPage({ params }) {
                   هیچ گفتگویی یافت نشد
                 </h3>
                 <p className="text-gray-500 text-sm">
-                  {type === 'received' 
+                  {type === 'received'
                     ? 'هیچ سوالی از این کاربر دریافت نکرده‌اید'
                     : 'هیچ سوالی به این کاربر ارسال نکرده‌اید'
                   }
@@ -147,8 +149,8 @@ export default function PersonConversationsPage({ params }) {
               </div>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white">
+            <div className="max-w-4xl mx-auto p-4">
+              <div className="space-y-3">
                 {conversations.map((conversation) => (
                   <ConversationListItem
                     key={conversation.id}

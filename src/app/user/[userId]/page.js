@@ -79,17 +79,6 @@ function UserProfileContent() {
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col bg-white">
-        <div className="tg-topbar flex items-center px-4 py-3 sticky top-0 z-40 bg-white border-b border-gray-100">
-          <button
-            onClick={() => router.back()}
-            className="mr-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowForwardIosRoundedIcon  className="text-gray-700" />
-          </button>
-          <div className="flex-1">
-            <div className="w-24 h-6 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        </div>
 
         <div className="flex-1 overflow-y-auto">
           <div className="w-full max-w-2xl mx-auto">
@@ -249,7 +238,7 @@ function UserProfileContent() {
               onClick={handleChatClick}
               className="
       fixed bottom-20
-      right-4 md:right-35
+      right-4 md:right-30
       w-16 h-16
       bg-blue-500 hover:bg-blue-600
       rounded-full flex items-center justify-center

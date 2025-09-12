@@ -54,10 +54,10 @@ export default function ConversationListItem({ conversation, onClick, type }) {
   return (
     <div
       onClick={onClick}
-      className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
+      className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:shadow-md active:shadow-lg transition-all duration-200 cursor-pointer"
       dir="rtl"
     >
-      <div className="px-4 py-4">
+      <div>
         {/* Header with status and time */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
