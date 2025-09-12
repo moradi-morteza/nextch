@@ -537,7 +537,7 @@ export default function ChatScreen() {
             showCommands={false}
           />
         ) : (
-          <div className="bg-gray-100 px-4 py-3 text-center text-gray-600 text-sm">
+          <div className="bg-gray-100 px-4 py-3 text-center text-gray-600 text-sm" style={{ direction: 'rtl' }}>
             {conversation?.status === 'pending_recipient' && conversation?.starter_id === currentUser?.id && 'در انتظار پاسخ طرف مقابل...'}
             {conversation?.status === 'pending_sender' && conversation?.recipient_id === currentUser?.id && 'در انتظار ادامه گفتگو از طرف مقابل...'}
             {conversation?.status === 'closed' && 'این گفتگو بسته شده است'}

@@ -128,7 +128,7 @@ export default function MessageItem({ message, selectionMode = false, isSelected
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
         style={{
-          ...((isSystem || message.type === 'video') ? undefined : {
+          ...((message.type === 'video') ? undefined : {
             direction: 'rtl',
             unicodeBidi: 'isolate-override',
             ...(message.type === 'audio' ? { minWidth: '50%' } : {}),
