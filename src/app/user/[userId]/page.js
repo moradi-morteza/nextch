@@ -245,13 +245,22 @@ function UserProfileContent() {
 
       {/* FAB for Chat */}
       {!user.is_own_profile && (
-        <button
-          onClick={handleChatClick}
-          className="fixed bottom-20 right-4 w-16 h-16 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-lg hover:shadow-xl z-50"
-        >
-          <MessageIcon className="text-white" sx={{ fontSize: 26 }} />
-        </button>
+          <button
+              onClick={handleChatClick}
+              className="
+      fixed bottom-20
+      right-4 md:right-35
+      w-16 h-16
+      bg-blue-500 hover:bg-blue-600
+      rounded-full flex items-center justify-center
+      transition-all duration-200 transform hover:scale-110 active:scale-95
+      shadow-lg hover:shadow-xl z-50
+    "
+          >
+            <MessageIcon className="text-white" sx={{ fontSize: 26 }} />
+          </button>
       )}
+
     </div>
   );
 }
