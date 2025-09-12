@@ -30,8 +30,8 @@ const RightBar = () => {
                             <Image
                                 src={pathname === tab.path ? tab.activeIcon : tab.icon}
                                 alt=""
-                                width={22}
-                                height={22}
+                                width={tab.path === '/conversations' ? 27 : 22}
+                                height={tab.path === '/conversations' ? 27 : 22}
                                 className="transition-all duration-300 group-hover:scale-110"
                             />
 
