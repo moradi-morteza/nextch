@@ -1,22 +1,21 @@
-import { useLang } from '../../../hooks/useLang.js';
+import { useLang } from '@/hooks/useLang';
 import { useRouter } from 'next/navigation';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import SendIcon from '@mui/icons-material/Send';
 import Avatar from '@mui/material/Avatar';
-
-export default function ChatHeader({ 
-  title = "Morteza", 
-  status = "online", 
-  avatar = "M", 
-  showBackButton = false, 
-  avatarUrl = null, 
-  showSendButton = false, 
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+export default function ChatHeader({
+  title = "Morteza",
+  status = "online",
+  avatar = "M",
+  showBackButton = false,
+  avatarUrl = null,
+  showSendButton = false,
   onSendConversation = null,
-  sendingConversation = false 
+  sendingConversation = false
 }) {
   const router = useRouter();
   const { t } = useLang();
-  
+
   const getStatusText = (status) => {
     if (status === "online") return t('status.online');
     if (status === "offline") return t('status.offline');
@@ -33,24 +32,24 @@ export default function ChatHeader({
             onClick={() => router.back()}
             className="ml-1 p-1.5 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <KeyboardArrowLeftIcon className="text-gray-700" sx={{ fontSize: 20 }} />
+            <ArrowForwardIosIcon className="text-gray-700" sx={{ fontSize: 20 }} />
           </button>
         )}
-        
-        <Avatar 
-          src={avatarUrl} 
+
+        <Avatar
+          src={avatarUrl}
           alt={title}
           className="w-8 h-8"
           sx={{ width: 32, height: 32 }}
         >
           {avatar}
         </Avatar>
-        
+
         <div className="leading-tight flex-1 text-right">
           <div className="font-medium text-gray-900 text-sm">{title}</div>
           <div className="text-xs text-gray-500">{getStatusText(status)}</div>
         </div>
-        
+
         {showSendButton && (
           <button
             onClick={onSendConversation}

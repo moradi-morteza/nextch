@@ -13,7 +13,6 @@ import { MAX_UPLOAD_MB } from "./config.js";
 import IconButton from "@mui/material/IconButton";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import SendIcon from "@mui/icons-material/Send";
 import { useLang } from "@/hooks/useLang";
 import { useAuth } from '@/contexts/AuthContext';
 import chatStorage from '@/utils/chatStorage';
@@ -69,15 +68,15 @@ export default function ChatScreen() {
 
       try {
         await chatStorage.init();
-        
+
         let existingConversation = null;
-        
+
         // If conversationId is provided, try to load that specific conversation
         if (conversationId) {
           try {
             const response = await api.get(`/conversation/${conversationId}`);
             existingConversation = response.data.conversation;
-            
+
             // Save to local storage for offline access
             await chatStorage.saveConversation(existingConversation);
           } catch (error) {
@@ -89,7 +88,7 @@ export default function ChatScreen() {
           // Try to find existing draft conversation with this recipient
           existingConversation = await chatStorage.getConversationByRecipient(targetUserId);
         }
-        
+
         if (!existingConversation) {
           // Create new draft conversation
           existingConversation = chatStorage.createDraftConversation(
@@ -104,19 +103,19 @@ export default function ChatScreen() {
 
         // Load existing messages for this conversation
         let existingMessages = await chatStorage.getMessages(existingConversation.id);
-        
-        // If it's a non-draft conversation and we have limited local messages, 
+
+        // If it's a non-draft conversation and we have limited local messages,
         // or if recipient is opening a pending conversation, fetch from server
         if (conversationId && (existingConversation.status !== 'draft' || existingMessages.length === 0)) {
           try {
             const response = await api.get(`/conversation/${conversationId}`);
             const serverMessages = response.data.conversation.messages || [];
-            
+
             // Save server messages to local storage for offline access
             for (const serverMsg of serverMessages) {
               await chatStorage.saveMessage(serverMsg);
             }
-            
+
             // Use server messages as the source of truth
             existingMessages = serverMessages;
           } catch (error) {
@@ -124,7 +123,7 @@ export default function ChatScreen() {
             // Fall back to local messages if server fetch fails
           }
         }
-        
+
         const formattedMessages = existingMessages.map(msg => makeText({
           text: msg.body,
           from: msg.sender_id === currentUser.id ? 'me' : 'them',
@@ -201,26 +200,26 @@ export default function ChatScreen() {
 
   const handleSend = async (value) => {
     if (!conversation || !currentUser) return;
-    
+
     // Check if user can send based on their role and conversation status
     const isStarter = conversation.starter_id === currentUser.id;
     const isRecipient = conversation.recipient_id === currentUser.id;
-    
+
     // Determine which action to take based on role and status
     const canSendDraft = isStarter && conversation.status === 'draft';
     const canAnswer = isRecipient && conversation.status === 'pending_recipient';
     const canContinue = isStarter && conversation.status === 'pending_sender';
-    
+
     if (!canSendDraft && !canAnswer && !canContinue) return;
 
     const messageText = value.trim();
     if (!messageText) return;
 
     // Create message for UI
-    const uiMessage = { 
-      type: "text", 
-      content: messageText, 
-      from: "me", 
+    const uiMessage = {
+      type: "text",
+      content: messageText,
+      from: "me",
       ts: Date.now()
     };
 
@@ -249,12 +248,12 @@ export default function ChatScreen() {
             body: messageText
           }
         });
-        
+
         // Update conversation status to pending_sender locally
         const updatedConversation = { ...conversation, status: 'pending_sender' };
         await chatStorage.saveConversation(updatedConversation);
         setConversation(updatedConversation);
-        
+
         // Update system messages
         setMessages(prevMessages => {
           const userMessages = prevMessages.filter(msg => msg.type !== 'system');
@@ -269,12 +268,12 @@ export default function ChatScreen() {
             body: messageText
           }
         });
-        
+
         // Update conversation status to pending_recipient locally
         const updatedConversation = { ...conversation, status: 'pending_recipient' };
         await chatStorage.saveConversation(updatedConversation);
         setConversation(updatedConversation);
-        
+
         // Update system messages
         setMessages(prevMessages => {
           const userMessages = prevMessages.filter(msg => msg.type !== 'system');
@@ -302,13 +301,13 @@ export default function ChatScreen() {
   };
 
   const handleVoice = ({ url, blob, duration }) => {
-    addNewMessage({ 
-      type: "audio", 
-      content: url, 
-      blob, 
-      from: "me", 
-      ts: Date.now(), 
-      duration 
+    addNewMessage({
+      type: "audio",
+      content: url,
+      blob,
+      from: "me",
+      ts: Date.now(),
+      duration
     });
   };
 
@@ -338,9 +337,9 @@ export default function ChatScreen() {
 
   const addSystemMessages = (messages, conversation, currentUser) => {
     if (!conversation) return messages;
-    
+
     const systemMessages = [];
-    
+
     // Add help message at top for draft conversations
     if (conversation.status === 'draft') {
       systemMessages.push(makeSystem({
@@ -348,10 +347,10 @@ export default function ChatScreen() {
         id: 'system-help'
       }));
     }
-    
+
     // Add all user messages
     const result = [...systemMessages, ...messages];
-    
+
     // Add status message at end based on conversation status and user role
     if (conversation.status === 'pending_recipient') {
       if (conversation.starter_id === currentUser?.id) {
@@ -366,7 +365,7 @@ export default function ChatScreen() {
         }));
       }
     }
-    
+
     // Add status message for pending_sender conversations
     if (conversation.status === 'pending_sender') {
       if (conversation.starter_id === currentUser?.id) {
@@ -381,7 +380,7 @@ export default function ChatScreen() {
         }));
       }
     }
-    
+
     // Add status message for closed conversations
     if (conversation.status === 'closed') {
       result.push(makeSystem({
@@ -389,7 +388,7 @@ export default function ChatScreen() {
         id: 'system-closed'
       }));
     }
-    
+
     return result;
   };
 
@@ -398,7 +397,7 @@ export default function ChatScreen() {
     const messageWithId = { ...message, id: newMessageId };
     setMessages((m) => [...m, messageWithId]);
     setNewMessageIds(prev => new Set([...prev, newMessageId]));
-    
+
     // Clear new message flag after animation completes
     setTimeout(() => {
       setNewMessageIds(prev => {
@@ -407,7 +406,7 @@ export default function ChatScreen() {
         return newSet;
       });
     }, 500);
-    
+
     return messageWithId;
   };
 
@@ -511,7 +510,7 @@ export default function ChatScreen() {
           </div>
         </ChatBackground>
 
-        {((conversation?.starter_id === currentUser?.id && conversation?.status === 'draft') || 
+        {((conversation?.starter_id === currentUser?.id && conversation?.status === 'draft') ||
           (conversation?.recipient_id === currentUser?.id && conversation?.status === 'pending_recipient') ||
           (conversation?.starter_id === currentUser?.id && conversation?.status === 'pending_sender')) ? (
           <ChatComposer
